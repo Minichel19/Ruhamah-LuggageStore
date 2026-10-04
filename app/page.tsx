@@ -16,6 +16,16 @@ export default async function Home() {
         <header className="relative bg-blue-900/80 text-white py-6 px-8">
           <h1 className="text-3xl font-bold">{settings?.business_name}</h1>
           <p className="text-blue-200">Safe luggage storage in Seattle</p>
+{settings?.is_closed && (
+  <div className="bg-red-600 text-white text-center py-3 mt-4 rounded">
+    ⚠ {settings?.closed_message || 'Currently closed'}
+  </div>
+)}
+{settings?.special_hours && (
+  <div className="bg-yellow-400 text-black text-center py-2 mt-2 rounded">
+    {settings?.special_hours}
+  </div>
+)}
         </header>
 
         <section className="relative max-w-4xl mx-auto py-24 px-8 text-center">
