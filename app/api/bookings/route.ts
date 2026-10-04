@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
 export async function GET(req: Request) {
+  const session = (await cookies()).get('admin_session');
+  if (session?.value !== 'authenticated') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get('session_id');
 
   if (sessionId) {
     const { data } = await supabaseAdmin
-      .from('bookings')
-      .select('*')
-      .eq('stripe_session_id', sessionId)
-      .single();
+      .from('bookings').select('*').eq('stripe_session_id', sessionId).single();
     return NextResponse.json({ booking: data });
   }
 
@@ -19,6 +22,11 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const session = (await cookies()).get('admin_session');
+  if (session?.value !== 'authenticated') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id, status } = await req.json();
   await supabaseAdmin.from('bookings').update({ status }).eq('id', id);
   return NextResponse.json({ ok: true });

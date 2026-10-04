@@ -1,10 +1,17 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Admin() {
   const [bookings, setBookings] = useState<any[]>([]);
+  const router = useRouter();
 
-  useEffect(() => { fetch('/api/bookings').then(r => r.json()).then(setBookings); }, []);
+  useEffect(() => {
+    fetch('/api/bookings')
+      .then(r => r.ok ? r.json() : Promise.reject('Unauthorized'))
+      .then(setBookings)
+      .catch(() => router.push('/admin/login'));
+  }, [router]);
 
   async function updateStatus(id: string, status: string) {
     await fetch('/api/bookings', {
