@@ -24,15 +24,15 @@ export default async function Home() {
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-bold text-xl mb-2">📍 Location</h3>
+            <h3 className="font-bold text-xl mb-2">Location</h3>
             <p className="text-gray-600">{settings?.address}</p>
           </div>
           <div>
-            <h3 className="font-bold text-xl mb-2">🕐 Hours</h3>
-            <p className="text-gray-600">{settings?.opening_time} – {settings?.closing_time}</p>
+            <h3 className="font-bold text-xl mb-2">Hours</h3>
+            <p className="text-gray-600">{settings?.opening_time} to {settings?.closing_time}</p>
           </div>
           <div>
-            <h3 className="font-bold text-xl mb-2">💰 Pricing</h3>
+            <h3 className="font-bold text-xl mb-2">Pricing</h3>
             <p className="text-gray-600">${settings?.price_per_bag} per bag / day</p>
           </div>
         </div>
