@@ -37,4 +37,6 @@ export async function PATCH(req: Request) {
   }
 
   const { id, status } = await req.json();
-  await supabaseAdmin.from('bookings').update({ status }).eq('
+  await supabaseAdmin.from('bookings').update({ status }).eq('id', id);
+  return NextResponse.json({ ok: true });
+}
