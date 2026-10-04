@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   const { password } = await req.json();
 
-  if (password !== process.env.ADMIN_PASSWORD) {
+  const { data: settings } = await supabaseAdmin
+    .from('settings')
+    .select('admin_password')
+    .eq('id', 1)
+    .single();
+
+  const storedPassword = settings?.admin_password || process.env.ADMIN_PASSWORD;
+
+  if (password !== storedPassword) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

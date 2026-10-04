@@ -37,6 +37,9 @@ export default function AdminLogin() {
         <button type="submit" className="w-full bg-blue-900 text-white py-3 rounded font-semibold">
           Login
         </button>
+        <p className="text-center text-sm text-gray-500 mt-4">
+          <a href="/admin/reset" className="text-blue-600 hover:underline">Forgot Password?</a>
+        </p>
       </form>
     </main>
   );
