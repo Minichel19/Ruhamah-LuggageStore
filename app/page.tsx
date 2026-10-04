@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import Map from './Map';
 
 export default async function Home() {
   const { data: settings } = await supabase.from('settings').select('*').single();
@@ -35,6 +36,11 @@ export default async function Home() {
             <h3 className="font-bold text-xl mb-2">Pricing</h3>
             <p className="text-gray-600">${settings?.price_per_bag} per bag / day</p>
           </div>
+        </div>
+
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-4">Find Us on the Map</h2>
+          <Map />
         </div>
       </section>
     </main>
