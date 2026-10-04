@@ -33,6 +33,27 @@ export default function Admin() {
     location.reload();
   }
 
+  async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>, bookingId: string) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('bookingId', bookingId);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (res.ok) {
+      alert('Photo uploaded!');
+      location.reload();
+    } else {
+      alert('Upload failed');
+    }
+  }
+
   async function saveSettings() {
     setSaving(true);
     await fetch('/api/settings', {
@@ -71,7 +92,6 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Store Status Settings - owner only */}
         {isOwner && (
           <section className="bg-white rounded-lg shadow p-6 mb-8">
             <h2 className="text-xl font-bold mb-4">Store Status & Hours</h2>
@@ -79,77 +99,54 @@ export default function Admin() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Opening Time</label>
-                <input
-                  type="time"
-                  value={settings.opening_time}
+                <input type="time" value={settings.opening_time}
                   onChange={e => setSettings({ ...settings, opening_time: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  className="w-full border p-2 rounded" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Closing Time</label>
-                <input
-                  type="time"
-                  value={settings.closing_time}
+                <input type="time" value={settings.closing_time}
                   onChange={e => setSettings({ ...settings, closing_time: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  className="w-full border p-2 rounded" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Price per Bag (per day)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={settings.price_per_bag}
+                <input type="number" step="0.01" value={settings.price_per_bag}
                   onChange={e => setSettings({ ...settings, price_per_bag: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  className="w-full border p-2 rounded" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Special Hours Note</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Closed Dec 25 for Christmas"
+                <input type="text" placeholder="e.g., Closed Dec 25 for Christmas"
                   value={settings.special_hours || ''}
                   onChange={e => setSettings({ ...settings, special_hours: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  className="w-full border p-2 rounded" />
               </div>
             </div>
 
             <div className="mt-4 flex items-center gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.is_closed || false}
+                <input type="checkbox" checked={settings.is_closed || false}
                   onChange={e => setSettings({ ...settings, is_closed: e.target.checked })}
-                  className="w-5 h-5"
-                />
+                  className="w-5 h-5" />
                 <span className="font-medium">Mark store as CLOSED</span>
               </label>
 
               {settings.is_closed && (
-                <input
-                  type="text"
-                  placeholder="Reason shown to customers"
+                <input type="text" placeholder="Reason shown to customers"
                   value={settings.closed_message || ''}
                   onChange={e => setSettings({ ...settings, closed_message: e.target.value })}
-                  className="flex-1 border p-2 rounded"
-                />
+                  className="flex-1 border p-2 rounded" />
               )}
             </div>
 
-            <button
-              onClick={saveSettings}
-              disabled={saving}
-              className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50"
-            >
+            <button onClick={saveSettings} disabled={saving}
+              className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50">
               {saving ? 'Saving...' : 'Save Settings'}
             </button>
           </section>
         )}
 
-        {/* Bookings Table - all staff can see */}
         <section className="bg-white rounded-lg shadow overflow-hidden">
           <h2 className="text-xl font-bold p-6 border-b">Bookings</h2>
           <table className="w-full">
@@ -173,9 +170,31 @@ export default function Admin() {
                   <td className="p-3">{b.bag_count}</td>
                   <td className="p-3">${b.total_price}</td>
                   <td className="p-3">{b.status}</td>
-                  <td className="p-3">
-                    {b.status === 'paid' && <button onClick={() => updateStatus(b.id, 'stored')} className="bg-blue-600 text-white px-3 py-1 rounded text-sm">Mark Stored</button>}
-                    {b.status === 'stored' && <button onClick={() => updateStatus(b.id, 'picked_up')} className="bg-green-600 text-white px-3 py-1 rounded text-sm">Mark Picked Up</button>}
+                  <td className="p-3 space-x-1">
+                    {b.status === 'paid' && (
+                      <>
+                        <label className="bg-purple-600 text-white px-3 py-1 rounded text-sm cursor-pointer inline-block">
+                          Take Photo
+                          <input type="file" accept="image/*" capture="environment" className="hidden"
+                            onChange={(e) => uploadPhoto(e, b.id)} />
+                        </label>
+                        <button onClick={() => updateStatus(b.id, 'stored')}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                          Mark Stored
+                        </button>
+                      </>
+                    )}
+                    {b.status === 'stored' && (
+                      <button onClick={() => updateStatus(b.id, 'picked_up')}
+                        className="bg-green-600 text-white px-3 py-1 rounded text-sm">
+                        Mark Picked Up
+                      </button>
+                    )}
+                    {b.photo_url && (
+                      <a href={b.photo_url} target="_blank" className="text-blue-600 underline text-sm inline-block">
+                        View Photo
+                      </a>
+                    )}
                   </td>
                 </tr>
               ))}
