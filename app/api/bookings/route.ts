@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 
-export async function GET(req: Request) {
+async function isAuthenticated() {
   const session = (await cookies()).get('admin_session');
-  if (session?.value !== 'authenticated') {
+  return !!session?.value;
+}
+
+export async function GET(req: Request) {
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -13,21 +17,24 @@ export async function GET(req: Request) {
 
   if (sessionId) {
     const { data } = await supabaseAdmin
-      .from('bookings').select('*').eq('stripe_session_id', sessionId).single();
+      .from('bookings')
+      .select('*')
+      .eq('stripe_session_id', sessionId)
+      .single();
     return NextResponse.json({ booking: data });
   }
 
-  const { data } = await supabaseAdmin.from('bookings').select('*').order('created_at', { ascending: false });
+  const { data } = await supabaseAdmin
+    .from('bookings')
+    .select('*')
+    .order('created_at', { ascending: false });
   return NextResponse.json(data || []);
 }
 
 export async function PATCH(req: Request) {
-  const session = (await cookies()).get('admin_session');
-  if (session?.value !== 'authenticated') {
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { id, status } = await req.json();
-  await supabaseAdmin.from('bookings').update({ status }).eq('id', id);
-  return NextResponse.json({ ok: true });
-}
+  await supabaseAdmin.from('bookings').update({ status }).eq('

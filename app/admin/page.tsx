@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 export default function Admin() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
+  const [role, setRole] = useState<string>('staff');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
@@ -17,6 +18,10 @@ export default function Admin() {
     fetch('/api/settings')
       .then(r => r.json())
       .then(setSettings);
+
+    fetch('/api/admin/me')
+      .then(r => r.ok ? r.json() : { role: 'staff' })
+      .then(d => setRole(d.role || 'staff'));
   }, [router]);
 
   async function updateStatus(id: string, status: string) {
@@ -40,95 +45,111 @@ export default function Admin() {
     location.reload();
   }
 
+  async function logout() {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    router.push('/admin/login');
+  }
+
   if (!settings) return <main className="p-8">Loading...</main>;
+
+  const isOwner = role === 'owner';
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <a href="/admin/staff" className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
-            Manage Staff →
-          </a>
+          <div className="flex gap-3">
+            {isOwner && (
+              <a href="/admin/staff" className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                Manage Staff →
+              </a>
+            )}
+            <button onClick={logout} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+              Logout
+            </button>
+          </div>
         </div>
 
-        {/* Store Status Settings */}
-        <section className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">Store Status & Hours</h2>
+        {/* Store Status Settings - owner only */}
+        {isOwner && (
+          <section className="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4">Store Status & Hours</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Opening Time</label>
-              <input
-                type="time"
-                value={settings.opening_time}
-                onChange={e => setSettings({ ...settings, opening_time: e.target.value })}
-                className="w-full border p-2 rounded"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Opening Time</label>
+                <input
+                  type="time"
+                  value={settings.opening_time}
+                  onChange={e => setSettings({ ...settings, opening_time: e.target.value })}
+                  className="w-full border p-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Closing Time</label>
+                <input
+                  type="time"
+                  value={settings.closing_time}
+                  onChange={e => setSettings({ ...settings, closing_time: e.target.value })}
+                  className="w-full border p-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Price per Bag (per day)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={settings.price_per_bag}
+                  onChange={e => setSettings({ ...settings, price_per_bag: e.target.value })}
+                  className="w-full border p-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Special Hours Note</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Closed Dec 25 for Christmas"
+                  value={settings.special_hours || ''}
+                  onChange={e => setSettings({ ...settings, special_hours: e.target.value })}
+                  className="w-full border p-2 rounded"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Closing Time</label>
-              <input
-                type="time"
-                value={settings.closing_time}
-                onChange={e => setSettings({ ...settings, closing_time: e.target.value })}
-                className="w-full border p-2 rounded"
-              />
+
+            <div className="mt-4 flex items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.is_closed || false}
+                  onChange={e => setSettings({ ...settings, is_closed: e.target.checked })}
+                  className="w-5 h-5"
+                />
+                <span className="font-medium">Mark store as CLOSED</span>
+              </label>
+
+              {settings.is_closed && (
+                <input
+                  type="text"
+                  placeholder="Reason shown to customers"
+                  value={settings.closed_message || ''}
+                  onChange={e => setSettings({ ...settings, closed_message: e.target.value })}
+                  className="flex-1 border p-2 rounded"
+                />
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Price per Bag (per day)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={settings.price_per_bag}
-                onChange={e => setSettings({ ...settings, price_per_bag: e.target.value })}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Special Hours Note</label>
-              <input
-                type="text"
-                placeholder="e.g., Closed Dec 25 for Christmas"
-                value={settings.special_hours || ''}
-                onChange={e => setSettings({ ...settings, special_hours: e.target.value })}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-          </div>
 
-          <div className="mt-4 flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.is_closed || false}
-                onChange={e => setSettings({ ...settings, is_closed: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="font-medium">Mark store as CLOSED</span>
-            </label>
+            <button
+              onClick={saveSettings}
+              disabled={saving}
+              className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Settings'}
+            </button>
+          </section>
+        )}
 
-            {settings.is_closed && (
-              <input
-                type="text"
-                placeholder="Reason shown to customers"
-                value={settings.closed_message || ''}
-                onChange={e => setSettings({ ...settings, closed_message: e.target.value })}
-                className="flex-1 border p-2 rounded"
-              />
-            )}
-          </div>
-
-          <button
-            onClick={saveSettings}
-            disabled={saving}
-            className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save Settings'}
-          </button>
-        </section>
-
-        {/* Bookings Table */}
+        {/* Bookings Table - all staff can see */}
         <section className="bg-white rounded-lg shadow overflow-hidden">
           <h2 className="text-xl font-bold p-6 border-b">Bookings</h2>
           <table className="w-full">
