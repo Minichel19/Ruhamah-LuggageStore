@@ -44,117 +44,124 @@ export default function Admin() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-
-      {/* Store Status Settings */}
-      <section className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-bold mb-4">Store Status & Hours</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Opening Time</label>
-            <input
-              type="time"
-              value={settings.opening_time}
-              onChange={e => setSettings({ ...settings, opening_time: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Closing Time</label>
-            <input
-              type="time"
-              value={settings.closing_time}
-              onChange={e => setSettings({ ...settings, closing_time: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Price per Bag (per day)</label>
-            <input
-              type="number"
-              step="0.01"
-              value={settings.price_per_bag}
-              onChange={e => setSettings({ ...settings, price_per_bag: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Special Hours Note</label>
-            <input
-              type="text"
-              placeholder="e.g., Closed Dec 25 for Christmas"
-              value={settings.special_hours || ''}
-              onChange={e => setSettings({ ...settings, special_hours: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-          </div>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <a href="/admin/staff" className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+            Manage Staff →
+          </a>
         </div>
 
-        <div className="mt-4 flex items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.is_closed || false}
-              onChange={e => setSettings({ ...settings, is_closed: e.target.checked })}
-              className="w-5 h-5"
-            />
-            <span className="font-medium">Mark store as CLOSED</span>
-          </label>
+        {/* Store Status Settings */}
+        <section className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-bold mb-4">Store Status & Hours</h2>
 
-          {settings.is_closed && (
-            <input
-              type="text"
-              placeholder="Reason shown to customers"
-              value={settings.closed_message || ''}
-              onChange={e => setSettings({ ...settings, closed_message: e.target.value })}
-              className="flex-1 border p-2 rounded"
-            />
-          )}
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Opening Time</label>
+              <input
+                type="time"
+                value={settings.opening_time}
+                onChange={e => setSettings({ ...settings, opening_time: e.target.value })}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Closing Time</label>
+              <input
+                type="time"
+                value={settings.closing_time}
+                onChange={e => setSettings({ ...settings, closing_time: e.target.value })}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Price per Bag (per day)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={settings.price_per_bag}
+                onChange={e => setSettings({ ...settings, price_per_bag: e.target.value })}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Special Hours Note</label>
+              <input
+                type="text"
+                placeholder="e.g., Closed Dec 25 for Christmas"
+                value={settings.special_hours || ''}
+                onChange={e => setSettings({ ...settings, special_hours: e.target.value })}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+          </div>
 
-        <button
-          onClick={saveSettings}
-          disabled={saving}
-          className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50"
-        >
-          {saving ? 'Saving...' : 'Save Settings'}
-        </button>
-      </section>
+          <div className="mt-4 flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.is_closed || false}
+                onChange={e => setSettings({ ...settings, is_closed: e.target.checked })}
+                className="w-5 h-5"
+              />
+              <span className="font-medium">Mark store as CLOSED</span>
+            </label>
 
-      {/* Bookings Table */}
-      <section className="bg-white rounded-lg shadow overflow-hidden">
-        <h2 className="text-xl font-bold p-6 border-b">Bookings</h2>
-        <table className="w-full">
-          <thead className="bg-blue-900 text-white">
-            <tr>
-              <th className="p-3 text-left">Customer</th>
-              <th className="p-3 text-left">Drop-off</th>
-              <th className="p-3 text-left">Pick-up</th>
-              <th className="p-3 text-left">Bags</th>
-              <th className="p-3 text-left">Total</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((b) => (
-              <tr key={b.id} className="border-b">
-                <td className="p-3">{b.customer_name}<br/><span className="text-sm text-gray-500">{b.customer_email}</span></td>
-                <td className="p-3">{b.dropoff_date}</td>
-                <td className="p-3">{b.pickup_date}</td>
-                <td className="p-3">{b.bag_count}</td>
-                <td className="p-3">${b.total_price}</td>
-                <td className="p-3">{b.status}</td>
-                <td className="p-3">
-                  {b.status === 'paid' && <button onClick={() => updateStatus(b.id, 'stored')} className="bg-blue-600 text-white px-3 py-1 rounded text-sm">Mark Stored</button>}
-                  {b.status === 'stored' && <button onClick={() => updateStatus(b.id, 'picked_up')} className="bg-green-600 text-white px-3 py-1 rounded text-sm">Mark Picked Up</button>}
-                </td>
+            {settings.is_closed && (
+              <input
+                type="text"
+                placeholder="Reason shown to customers"
+                value={settings.closed_message || ''}
+                onChange={e => setSettings({ ...settings, closed_message: e.target.value })}
+                className="flex-1 border p-2 rounded"
+              />
+            )}
+          </div>
+
+          <button
+            onClick={saveSettings}
+            disabled={saving}
+            className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Settings'}
+          </button>
+        </section>
+
+        {/* Bookings Table */}
+        <section className="bg-white rounded-lg shadow overflow-hidden">
+          <h2 className="text-xl font-bold p-6 border-b">Bookings</h2>
+          <table className="w-full">
+            <thead className="bg-blue-900 text-white">
+              <tr>
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Drop-off</th>
+                <th className="p-3 text-left">Pick-up</th>
+                <th className="p-3 text-left">Bags</th>
+                <th className="p-3 text-left">Total</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {bookings.map((b) => (
+                <tr key={b.id} className="border-b">
+                  <td className="p-3">{b.customer_name}<br/><span className="text-sm text-gray-500">{b.customer_email}</span></td>
+                  <td className="p-3">{b.dropoff_date}</td>
+                  <td className="p-3">{b.pickup_date}</td>
+                  <td className="p-3">{b.bag_count}</td>
+                  <td className="p-3">${b.total_price}</td>
+                  <td className="p-3">{b.status}</td>
+                  <td className="p-3">
+                    {b.status === 'paid' && <button onClick={() => updateStatus(b.id, 'stored')} className="bg-blue-600 text-white px-3 py-1 rounded text-sm">Mark Stored</button>}
+                    {b.status === 'stored' && <button onClick={() => updateStatus(b.id, 'picked_up')} className="bg-green-600 text-white px-3 py-1 rounded text-sm">Mark Picked Up</button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </div>
     </main>
   );
 }

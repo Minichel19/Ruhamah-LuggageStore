@@ -3,27 +3,42 @@ import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req: Request) {
-  const { password } = await req.json();
+  const { email, password } = await req.json();
 
-  const { data: settings } = await supabaseAdmin
-    .from('settings')
-    .select('admin_password')
-    .eq('id', 1)
-    .single();
-
-  const storedPassword = settings?.admin_password || process.env.ADMIN_PASSWORD;
-
-  if (password !== storedPassword) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!email || !password) {
+    return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
   }
 
-  (await cookies()).set('admin_session', 'authenticated', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24,
-  });
+  // Check staff table
+  const { data: staff } = await supabaseAdmin
+    .from('staff')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .eq('password', password)
+    .single();
 
-  return NextResponse.json({ success: true });
+  if (staff) {
+    (await cookies()).set('admin_session', `${staff.role}-${staff.id}`, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    });
+    return NextResponse.json({ success: true, role: staff.role });
+  }
+
+  // Fallback: old single password (owner backup)
+  if (password === process.env.ADMIN_PASSWORD) {
+    (await cookies()).set('admin_session', 'owner-backup', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    });
+    return NextResponse.json({ success: true, role: 'owner' });
+  }
+
+  return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
 }
