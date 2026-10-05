@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Map from './Map';
+import ReviewsSection from '@/components/ReviewsSection';
 
 export default async function Home() {
   const { data: settings } = await supabase.from('settings').select('*').single();
@@ -16,16 +17,16 @@ export default async function Home() {
         <header className="relative bg-blue-900/80 text-white py-6 px-8">
           <h1 className="text-3xl font-bold">{settings?.business_name}</h1>
           <p className="text-blue-200">Safe luggage storage in Seattle</p>
-{settings?.is_closed && (
-  <div className="bg-red-600 text-white text-center py-3 mt-4 rounded">
-    ⚠ {settings?.closed_message || 'Currently closed'}
-  </div>
-)}
-{settings?.special_hours && (
-  <div className="bg-yellow-400 text-black text-center py-2 mt-2 rounded">
-    {settings?.special_hours}
-  </div>
-)}
+          {settings?.is_closed && (
+            <div className="bg-red-600 text-white text-center py-3 mt-4 rounded">
+              ⚠ {settings?.closed_message || 'Currently closed'}
+            </div>
+          )}
+          {settings?.special_hours && (
+            <div className="bg-yellow-400 text-black text-center py-2 mt-2 rounded">
+              {settings?.special_hours}
+            </div>
+          )}
         </header>
 
         <section className="relative max-w-4xl mx-auto py-24 px-8 text-center">
@@ -85,6 +86,14 @@ export default async function Home() {
             <li>Instant online booking with QR code confirmation</li>
             <li>Walking distance to major Seattle attractions</li>
           </ul>
+        </div>
+      </section>
+
+      {/* ⭐ Reviews Section — NEW */}
+      <section className="bg-yellow-50 py-16 px-8">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8 text-center">What Our Customers Say</h2>
+          <ReviewsSection />
         </div>
       </section>
 
