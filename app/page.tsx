@@ -12,17 +12,17 @@ export default async function Home() {
         className="relative bg-cover bg-center"
         style={{ backgroundImage: "url('/seattle.jpg')" }}
       >
-        {/* Lighter overlay so Seattle image shows through */}
-        <div className="absolute inset-0 bg-black/20"></div>
+        {/* Subtle gradient only at bottom — no black overlay on the image */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40"></div>
 
-        <header className="relative bg-blue-900/70 text-white py-6 px-8">
+        <header className="relative bg-blue-900/70 text-white py-6 px-4 md:px-8">
           <div className="flex items-center gap-3">
             <div className="bg-white rounded-lg p-2 shadow-lg">
               <span className="text-3xl">🧳</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold">{settings?.business_name}</h1>
-              <p className="text-blue-200">Safe luggage storage in Seattle</p>
+              <h1 className="text-2xl md:text-3xl font-bold">{settings?.business_name}</h1>
+              <p className="text-sm md:text-base text-blue-200">Safe luggage storage in Seattle</p>
             </div>
           </div>
           {settings?.is_closed && (
@@ -37,25 +37,25 @@ export default async function Home() {
           )}
         </header>
 
-        <section className="relative max-w-4xl mx-auto py-24 px-8 text-center">
-          <h2 className="text-5xl font-bold mb-6 text-white drop-shadow-2xl">
+        <section className="relative max-w-4xl mx-auto py-20 px-4 md:px-8 text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.9)] leading-tight">
             Store Your Bags. Explore Seattle.
           </h2>
-          <p className="text-xl text-white mb-8 drop-shadow-lg">
+          <p className="text-base md:text-xl text-white mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] font-medium">
             Drop off your luggage at our secure location in Belltown. Flat rate:{' '}
             <strong>${settings?.price_per_bag}/bag/day</strong>.
           </p>
 
           <Link
             href="/book"
-            className="bg-blue-900 text-white px-10 py-5 rounded-lg text-xl font-semibold hover:bg-blue-800 inline-block shadow-xl"
+            className="bg-blue-900 text-white px-8 py-4 md:px-10 md:py-5 rounded-lg text-lg md:text-xl font-semibold hover:bg-blue-800 inline-block shadow-xl"
           >
             Book Storage Now
           </Link>
         </section>
       </div>
 
-      <section className="max-w-4xl mx-auto py-16 px-8">
+      <section className="max-w-4xl mx-auto py-16 px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-gray-50 p-6 rounded-lg">
             <h3 className="font-bold text-xl mb-2">Location</h3>
@@ -74,7 +74,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-blue-50 py-16 px-8">
+      <section className="bg-blue-50 py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-6">About Ruhamah LuggageStore</h2>
           <p className="text-lg text-gray-700 mb-4">
@@ -97,19 +97,19 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-yellow-50 py-16 px-8">
+      <section className="bg-yellow-50 py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">What Our Customers Say</h2>
           <ReviewsSection />
         </div>
       </section>
 
-      <section className="max-w-4xl mx-auto py-16 px-8">
+      <section className="max-w-4xl mx-auto py-16 px-4 md:px-8">
         <h2 className="text-3xl font-bold mb-6">Find Us on the Map</h2>
         <Map />
       </section>
 
-      <footer className="bg-gray-900 text-white py-8 px-8 mt-16">
+      <footer className="bg-gray-900 text-white py-8 px-4 md:px-8 mt-16">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
             <div>
