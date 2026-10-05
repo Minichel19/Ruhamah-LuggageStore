@@ -10,6 +10,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scannedBooking, setScannedBooking] = useState<any>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,9 +23,7 @@ export default function Admin() {
 
     fetch('/api/admin/me')
       .then(r => r.ok ? r.json() : { role: 'unauthorized' })
-      .then(d => {
-        setRole(d.role || 'unauthorized');
-      });
+      .then(d => setRole(d.role || 'unauthorized'));
   }, [router]);
 
   async function updateStatus(id: string, status: string) {
@@ -181,21 +180,40 @@ export default function Admin() {
       className="min-h-screen bg-cover bg-center bg-fixed pb-28"
       style={{ backgroundImage: "url('/usa-flag.jpg')" }}
     >
-      {/* Header — only title, no buttons */}
+      {/* Header — title only */}
       <div className="bg-gradient-to-r from-blue-900 via-red-600 to-blue-900 text-white py-6 px-8 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center gap-3">
-          <span className="text-4xl">🇺🇸</span>
-          <div>
-            <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
-            <p className="text-sm text-blue-100">Role: {role}</p>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">🇺🇸</span>
+            <div>
+              <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
+              <p className="text-sm text-blue-100">Role: {role}</p>
+            </div>
           </div>
+          {isOwner && (
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50"
+            >
+              {showSettings ? '▲ Hide Settings' : '▼ Store Settings'}
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-8 bg-white/90 rounded-lg shadow-2xl mt-8 mb-8">
-        {isOwner && (
+      <div className="max-w-6xl mx-auto p-8">
+        {/* Collapsible Settings — only shows when clicked */}
+        {isOwner && showSettings && (
           <section className="bg-white rounded-lg shadow p-6 mb-8 border-t-4 border-blue-900">
-            <h2 className="text-xl font-bold mb-4 text-blue-900">Store Status & Hours</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-blue-900">Store Status & Hours</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-500 hover:text-gray-800 text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
