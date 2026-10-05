@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET() {
   const { data } = await supabaseAdmin
     .from('reviews')
@@ -34,8 +37,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   }
 
+  // Only include booking_id if it's a valid UUID
+  const validBookingId = bookingId && UUID_REGEX.test(bookingId) ? bookingId : null;
+
   const { error } = await supabaseAdmin.from('reviews').insert({
-    booking_id: bookingId || null,
+    booking_id: validBookingId,
     customer_name: name.trim(),
     stars,
     comment: comment || null,
