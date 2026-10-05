@@ -84,6 +84,7 @@ export async function sendOwnerNotification(booking: any) {
     console.error('Failed to send owner email:', error);
   }
 }
+
 export async function sendReviewRequest(booking: any) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
