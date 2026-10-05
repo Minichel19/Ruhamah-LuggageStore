@@ -28,21 +28,23 @@ export default function ReviewsSection() {
     <div>
       <div className="text-center mb-8">
         <div className="text-5xl font-bold text-yellow-500">
-          {average.toFixed(1)} ?
+          {average.toFixed(1)} / 5
         </div>
-        <p className="text-gray-600 mt-2">Based on {total} review{total !== 1 ? 's' : ''}</p>
+        <p className="text-gray-600 mt-2">
+          Based on {total} review{total !== 1 ? 's' : ''}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {reviews.slice(0, 6).map((r) => (
           <div key={r.id} className="bg-white p-5 rounded-lg shadow">
-            <div className="text-yellow-400 text-lg mb-1">
-              {'?'.repeat(r.stars)}{'?'.repeat(5 - r.stars)}
+            <div className="text-yellow-500 text-lg mb-1 font-bold">
+              {r.stars} / 5 stars
             </div>
             {r.comment && (
-              <p className="text-gray-700 mb-2 italic">&ldquo;{r.comment}&rdquo;</p>
+              <p className="text-gray-700 mb-2 italic">"{r.comment}"</p>
             )}
-            <p className="text-sm text-gray-500">— {r.customer_name}</p>
+            <p className="text-sm text-gray-500">-- {r.customer_name}</p>
           </div>
         ))}
       </div>
