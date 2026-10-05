@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const FROM_EMAIL = 'Ruhamah LuggageStore <onboarding@resend.dev>';
+const FROM_EMAIL = 'Ruhamah LuggageStore <hello@updates.lugagestore.com>';
 const OWNER_EMAIL = 'minichelgera@gmail.com';
 
 export async function sendBookingConfirmation(booking: any) {
