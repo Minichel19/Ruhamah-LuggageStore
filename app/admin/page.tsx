@@ -184,6 +184,9 @@ export default function Admin() {
             </div>
           </div>
           <div className="flex gap-3">
+            <a href="/admin/calendar" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
+              Calendar
+            </a>
             {isOwner && (
               <a href="/admin/staff" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
                 Manage Staff →
