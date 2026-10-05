@@ -1,12 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const FROM_EMAIL = 'Ruhamah LuggageStore <onboarding@resend.dev>';
 const OWNER_EMAIL = 'minichelgera@gmail.com';
 
 export async function sendBookingConfirmation(booking: any) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log('RESEND_API_KEY not set, skipping email');
+    return;
+  }
+
   try {
+    const resend = new Resend(apiKey);
     await resend.emails.send({
       from: FROM_EMAIL,
       to: booking.customer_email,
@@ -41,7 +46,14 @@ export async function sendBookingConfirmation(booking: any) {
 }
 
 export async function sendOwnerNotification(booking: any) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log('RESEND_API_KEY not set, skipping owner notification');
+    return;
+  }
+
   try {
+    const resend = new Resend(apiKey);
     await resend.emails.send({
       from: FROM_EMAIL,
       to: OWNER_EMAIL,
