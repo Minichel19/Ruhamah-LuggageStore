@@ -30,19 +30,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Please select 1-5 stars' }, { status: 400 });
   }
 
-  let customerName = name;
-  if (!customerName && bookingId) {
-    const { data: booking } = await supabaseAdmin
-      .from('bookings')
-      .select('customer_name')
-      .eq('id', bookingId)
-      .single();
-    customerName = booking?.customer_name || 'Anonymous';
+  if (!name || !name.trim()) {
+    return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   }
 
   const { error } = await supabaseAdmin.from('reviews').insert({
     booking_id: bookingId || null,
-    customer_name: customerName || 'Anonymous',
+    customer_name: name.trim(),
     stars,
     comment: comment || null,
   });

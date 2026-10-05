@@ -18,7 +18,12 @@ function ReviewForm() {
       setError('Please select a star rating');
       return;
     }
+    if (!name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
     setLoading(true);
+    setError('');
     const res = await fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,7 +31,10 @@ function ReviewForm() {
     });
     setLoading(false);
     if (res.ok) setSent(true);
-    else setError('Failed to submit review');
+    else {
+      const d = await res.json();
+      setError(d.error || 'Failed to submit review');
+    }
   }
 
   if (sent) {
@@ -48,20 +56,32 @@ function ReviewForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex justify-center gap-2 my-4">
           {[1, 2, 3, 4, 5].map((s) => (
-            <button key={s} type="button" onClick={() => setStars(s)}
-              className="text-5xl">
+            <button key={s} type="button" onClick={() => setStars(s)} className="text-5xl">
               <span className={s <= stars ? 'text-yellow-400' : 'text-gray-300'}>
                 {s <= stars ? '\u2605' : '\u2606'}
               </span>
             </button>
           ))}
         </div>
-        <input placeholder="Your Name (optional)" value={name}
-          onChange={(e) => setName(e.target.value)} className="w-full border p-3 rounded" />
-        <textarea placeholder="Tell us about your experience (optional)" value={comment}
-          onChange={(e) => setComment(e.target.value)} rows={4} className="w-full border p-3 rounded" />
-        <button disabled={loading} type="submit"
-          className="w-full bg-blue-900 text-white py-3 rounded font-semibold disabled:opacity-50">
+        <input
+          placeholder="Your Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full border p-3 rounded"
+          required
+        />
+        <textarea
+          placeholder="Tell us about your experience (optional)"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={4}
+          className="w-full border p-3 rounded"
+        />
+        <button
+          disabled={loading}
+          type="submit"
+          className="w-full bg-blue-900 text-white py-3 rounded font-semibold disabled:opacity-50"
+        >
           {loading ? 'Submitting...' : 'Submit Review'}
         </button>
       </form>
