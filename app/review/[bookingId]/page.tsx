@@ -38,11 +38,11 @@ export default function ReviewPage({ params }: { params: Promise<{ bookingId: st
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
         <div className="bg-white p-8 rounded-lg shadow max-w-md text-center">
-          <div className="text-6xl mb-4">⭐</div>
+          <div className="text-6xl mb-4">?</div>
           <h1 className="text-2xl font-bold mb-2">Thank You!</h1>
           <p className="text-gray-600">Your review has been submitted.</p>
           <a href="/" className="text-blue-600 hover:underline mt-4 inline-block">
-            ← Back to Home
+            ? Back to Home
           </a>
         </div>
       </main>
@@ -70,7 +70,7 @@ export default function ReviewPage({ params }: { params: Promise<{ bookingId: st
                   className="text-5xl transition-transform hover:scale-110"
                 >
                   <span className={s <= (hover || stars) ? 'text-yellow-400' : 'text-gray-300'}>
-                    ★
+                    ?
                   </span>
                 </button>
               ))}
