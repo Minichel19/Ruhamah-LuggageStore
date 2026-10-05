@@ -1,6 +1,13 @@
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { data: settings } = await supabase.from('settings').select('*').single();
+
+  const contactEmail = settings?.contact_email || 'hello@updates.lugagestore.com';
+  const contactPhone = settings?.contact_phone || '(206) 555-1234';
+  const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
+
   return (
     <main className="min-h-screen bg-gray-50 py-16 px-8">
       <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow">
@@ -17,29 +24,28 @@ export default function ContactPage() {
           <div>
             <h2 className="text-xl font-bold mb-4">📍 Address</h2>
             <p className="text-gray-700">
-              Ruhamah LuggageStore<br/>
-              2801 1st Ave Ste A<br/>
-              Seattle, WA 98121
+              {settings?.business_name || 'Ruhamah LuggageStore'}<br/>
+              {settings?.address || '2801 1st Ave Ste A, Seattle, WA 98121'}
             </p>
 
             <h2 className="text-xl font-bold mb-4 mt-8">📞 Phone</h2>
             <p className="text-gray-700">
-              <a href="tel:+12065551234" className="text-blue-600 hover:underline">
-                (206) 555-1234
+              <a href={`tel:${cleanPhone}`} className="text-blue-600 hover:underline">
+                {contactPhone}
               </a>
             </p>
 
             <h2 className="text-xl font-bold mb-4 mt-8">✉️ Email</h2>
             <p className="text-gray-700">
-              <a href="mailto:hello@updates.lugagestore.com" className="text-blue-600 hover:underline">
-                hello@updates.lugagestore.com
+              <a href={`mailto:${contactEmail}`} className="text-blue-600 hover:underline">
+                {contactEmail}
               </a>
             </p>
 
             <h2 className="text-xl font-bold mb-4 mt-8">🕐 Hours</h2>
             <p className="text-gray-700">
               Monday – Sunday<br/>
-              8:00 AM – 8:00 PM
+              {settings?.opening_time || '08:00'} – {settings?.closing_time || '20:00'}
             </p>
 
             <h2 className="text-xl font-bold mb-4 mt-8">💬 WhatsApp</h2>
@@ -69,7 +75,7 @@ export default function ContactPage() {
             Chat with us on WhatsApp — we typically respond within minutes during business hours.
           </p>
           <a
-            href="https://wa.me/12065551234?text=Hi! I have a question about luggage storage."
+            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hi! I have a question about luggage storage.')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold inline-block"

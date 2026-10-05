@@ -105,10 +105,9 @@ export default async function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
             <div>
-              <h3 className="font-bold mb-3">Ruhamah LuggageStore</h3>
+              <h3 className="font-bold mb-3">{settings?.business_name || 'Ruhamah LuggageStore'}</h3>
               <p className="text-sm text-gray-400">
-                2801 1st Ave Ste A<br/>
-                Seattle, WA 98121
+                {settings?.address || '2801 1st Ave Ste A, Seattle, WA 98121'}
               </p>
             </div>
             <div>
@@ -130,15 +129,22 @@ export default async function Home() {
               <ul className="space-y-1 text-sm text-gray-400">
                 <li><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
                 <li>
-                  <a href="mailto:hello@updates.lugagestore.com" className="hover:text-white">
-                    Email
+                  <a href={`mailto:${settings?.contact_email || 'hello@updates.lugagestore.com'}`} className="hover:text-white break-all">
+                    {settings?.contact_email || 'hello@updates.lugagestore.com'}
                   </a>
                 </li>
+                {settings?.contact_phone && (
+                  <li>
+                    <a href={`tel:${settings.contact_phone.replace(/[^0-9]/g, '')}`} className="hover:text-white">
+                      {settings.contact_phone}
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
-            © 2026 Ruhamah LuggageStore. All rights reserved.
+            © 2026 {settings?.business_name || 'Ruhamah LuggageStore'}. All rights reserved.
           </div>
         </div>
       </footer>
