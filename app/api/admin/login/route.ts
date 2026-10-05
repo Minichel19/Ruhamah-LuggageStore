@@ -13,22 +13,6 @@ export async function POST(req: Request) {
 
   const normalizedEmail = email.toLowerCase();
 
-  // Rate limit: max 5 failed attempts in last 15 minutes
-  const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  const { count: failedAttempts } = await supabaseAdmin
-    .from('login_attempts')
-    .select('*', { count: 'exact', head: true })
-    .eq('email', normalizedEmail)
-    .eq('success', false)
-    .gte('created_at', fifteenMinAgo);
-
-  if ((failedAttempts || 0) >= 5) {
-    return NextResponse.json(
-      { error: 'Too many failed attempts. Try again in 15 minutes.' },
-      { status: 429 }
-    );
-  }
-
   // Look up staff by email
   const { data: staff } = await supabaseAdmin
     .from('staff')
@@ -43,7 +27,6 @@ export async function POST(req: Request) {
       valid = await bcrypt.compare(password, staff.password);
     } else {
       valid = staff.password === password;
-      // Upgrade to hashed version on first successful login
       if (valid) {
         const hashed = await bcrypt.hash(password, 10);
         await supabaseAdmin.from('staff').update({ password: hashed }).eq('id', staff.id);
@@ -51,7 +34,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // Log the attempt
+  // Log the attempt (but don't rate limit)
   await supabaseAdmin.from('login_attempts').insert({
     email: normalizedEmail,
     success: valid,
