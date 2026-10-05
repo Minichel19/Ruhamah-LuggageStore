@@ -23,7 +23,6 @@ export default function Admin() {
     fetch('/api/admin/me')
       .then(r => r.ok ? r.json() : { role: 'unauthorized' })
       .then(d => {
-        console.log('Role from API:', d.role);
         setRole(d.role || 'unauthorized');
       });
   }, [router]);
@@ -86,137 +85,109 @@ export default function Admin() {
       {items.length === 0 ? (
         <div className="p-6 text-center text-gray-500">No bookings</div>
       ) : (
-        <table className="w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left">Customer</th>
-              <th className="p-3 text-left">Drop-off</th>
-              <th className="p-3 text-left">Pick-up</th>
-              <th className="p-3 text-left">Bags</th>
-              <th className="p-3 text-left">Total</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((b) => (
-              <tr key={b.id} className="border-b">
-                <td className="p-3">
-                  {b.customer_name}<br/>
-                  <span className="text-sm text-gray-500">{b.customer_email}</span>
-                  {b.notes && (
-                    <div className="text-sm text-blue-700 bg-blue-50 p-2 rounded mt-1">
-                      {b.notes}
-                    </div>
-                  )}
-                  {b.photo_url && (
-                    <div className="text-sm text-green-700 bg-green-50 p-1 rounded mt-1 inline-block">
-                      &#128247; Photo on file
-                    </div>
-                  )}
-                </td>
-                <td className="p-3">{b.dropoff_date}</td>
-                <td className="p-3">{b.pickup_date}</td>
-                <td className="p-3">{b.bag_count}</td>
-                <td className="p-3">${b.total_price}</td>
-                <td className="p-3">{b.status}</td>
-                <td className="p-3 space-x-1">
-                  {b.status === 'paid' && (
-                    <>
-                      <label className="bg-purple-600 text-white px-3 py-1 rounded text-sm cursor-pointer inline-block">
-                        Take Photo
-                        <input type="file" accept="image/*" capture="environment" className="hidden"
-                          onChange={(e) => uploadPhoto(e, b.id)} />
-                      </label>
-                      <button onClick={() => updateStatus(b.id, 'stored')}
-                        className="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                        Mark Stored
-                      </button>
-                    </>
-                  )}
-                  {b.status === 'stored' && (
-                    <button onClick={() => updateStatus(b.id, 'picked_up')}
-                      className="bg-green-700 text-white px-3 py-1 rounded text-sm">
-                      Mark Picked Up
-                    </button>
-                  )}
-                  {b.status === 'picked_up' && (
-                    <>
-                      <a
-                        href={`https://wa.me/${b.customer_phone?.replace(/[^0-9]/g, '') || ''}?text=${encodeURIComponent(
-                          `Hi ${b.customer_name}, thank you for choosing Ruhamah LuggageStore! We'd love your feedback: https://lugagestore.com/review?booking=${b.id}`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-yellow-500 text-white px-3 py-1 rounded text-sm inline-block"
-                      >
-                        Send Review
-                      </a>
-                      <a
-                        href={`/review?booking=${b.id}`}
-                        target="_blank"
-                        className="text-blue-600 underline text-sm ml-2 inline-block"
-                      >
-                        Review Link
-                      </a>
-                    </>
-                  )}
-                  {b.photo_url && (
-                    <a href={b.photo_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm inline-block ml-2">
-                      View Photo
-                    </a>
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Drop-off</th>
+                <th className="p-3 text-left">Pick-up</th>
+                <th className="p-3 text-left">Bags</th>
+                <th className="p-3 text-left">Total</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items.map((b) => (
+                <tr key={b.id} className="border-b">
+                  <td className="p-3">
+                    {b.customer_name}<br/>
+                    <span className="text-sm text-gray-500">{b.customer_email}</span>
+                    {b.notes && (
+                      <div className="text-sm text-blue-700 bg-blue-50 p-2 rounded mt-1">
+                        {b.notes}
+                      </div>
+                    )}
+                    {b.photo_url && (
+                      <div className="text-sm text-green-700 bg-green-50 p-1 rounded mt-1 inline-block">
+                        &#128247; Photo on file
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-3">{b.dropoff_date}</td>
+                  <td className="p-3">{b.pickup_date}</td>
+                  <td className="p-3">{b.bag_count}</td>
+                  <td className="p-3">${b.total_price}</td>
+                  <td className="p-3">{b.status}</td>
+                  <td className="p-3 space-x-1">
+                    {b.status === 'paid' && (
+                      <>
+                        <label className="bg-purple-600 text-white px-3 py-1 rounded text-sm cursor-pointer inline-block">
+                          Take Photo
+                          <input type="file" accept="image/*" capture="environment" className="hidden"
+                            onChange={(e) => uploadPhoto(e, b.id)} />
+                        </label>
+                        <button onClick={() => updateStatus(b.id, 'stored')}
+                          className="bg-green-600 text-white px-3 py-1 rounded text-sm">
+                          Mark Stored
+                        </button>
+                      </>
+                    )}
+                    {b.status === 'stored' && (
+                      <button onClick={() => updateStatus(b.id, 'picked_up')}
+                        className="bg-green-700 text-white px-3 py-1 rounded text-sm">
+                        Mark Picked Up
+                      </button>
+                    )}
+                    {b.status === 'picked_up' && (
+                      <>
+                        <a
+                          href={`https://wa.me/${b.customer_phone?.replace(/[^0-9]/g, '') || ''}?text=${encodeURIComponent(
+                            `Hi ${b.customer_name}, thank you for choosing Ruhamah LuggageStore! We'd love your feedback: https://lugagestore.com/review?booking=${b.id}`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-yellow-500 text-white px-3 py-1 rounded text-sm inline-block"
+                        >
+                          Send Review
+                        </a>
+                        <a
+                          href={`/review?booking=${b.id}`}
+                          target="_blank"
+                          className="text-blue-600 underline text-sm ml-2 inline-block"
+                        >
+                          Review Link
+                        </a>
+                      </>
+                    )}
+                    {b.photo_url && (
+                      <a href={b.photo_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm inline-block ml-2">
+                        View Photo
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );
 
   return (
     <main
-      className="min-h-screen bg-cover bg-center bg-fixed"
+      className="min-h-screen bg-cover bg-center bg-fixed pb-28"
       style={{ backgroundImage: "url('/usa-flag.jpg')" }}
     >
+      {/* Header — only title, no buttons */}
       <div className="bg-gradient-to-r from-blue-900 via-red-600 to-blue-900 text-white py-6 px-8 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-4xl">🇺🇸</span>
-            <div>
-              <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
-              <p className="text-sm text-blue-100">Role: {role}</p>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => { setShowScanner(true); setScannedBooking(null); }}
-              className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50"
-            >
-              Scan QR
-            </button>
-            <a href="/admin/calendar" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
-              Calendar
-            </a>
-            <a href="/admin/analytics" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
-              Analytics
-            </a>
-            <a
-              href="/api/export"
-              download
-              className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700"
-            >
-              Export Excel
-            </a>
-            {isOwner && (
-              <a href="/admin/staff" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
-                Manage Staff →
-              </a>
-            )}
-            <button onClick={logout} className="bg-red-700 text-white px-4 py-2 rounded font-semibold hover:bg-red-800 border border-white">
-              Logout
-            </button>
+        <div className="max-w-6xl mx-auto flex items-center gap-3">
+          <span className="text-4xl">🇺🇸</span>
+          <div>
+            <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
+            <p className="text-sm text-blue-100">Role: {role}</p>
           </div>
         </div>
       </div>
@@ -294,6 +265,49 @@ export default function Admin() {
         <BookingTable title="🟢 Upcoming" items={upcoming} color="bg-green-700" />
         <BookingTable title="⚫ Past (Picked Up)" items={past} color="bg-gray-600" />
       </div>
+
+      {/* Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-blue-900 text-white shadow-2xl z-40 border-t-4 border-red-600">
+        <div className="max-w-6xl mx-auto flex justify-around items-center py-2 overflow-x-auto">
+          <button
+            onClick={() => { setShowScanner(true); setScannedBooking(null); }}
+            className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]"
+          >
+            <span className="text-2xl">📷</span>
+            <span className="text-xs mt-1">Scan QR</span>
+          </button>
+
+          <a href="/admin/calendar" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]">
+            <span className="text-2xl">📅</span>
+            <span className="text-xs mt-1">Calendar</span>
+          </a>
+
+          <a href="/admin/analytics" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]">
+            <span className="text-2xl">📊</span>
+            <span className="text-xs mt-1">Analytics</span>
+          </a>
+
+          <a href="/api/export" download className="flex flex-col items-center px-3 py-2 hover:bg-green-700 rounded min-w-[70px]">
+            <span className="text-2xl">📥</span>
+            <span className="text-xs mt-1">Export</span>
+          </a>
+
+          {isOwner && (
+            <a href="/admin/staff" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]">
+              <span className="text-2xl">👥</span>
+              <span className="text-xs mt-1">Staff</span>
+            </a>
+          )}
+
+          <button
+            onClick={logout}
+            className="flex flex-col items-center px-3 py-2 hover:bg-red-700 rounded min-w-[70px]"
+          >
+            <span className="text-2xl">🚪</span>
+            <span className="text-xs mt-1">Logout</span>
+          </button>
+        </div>
+      </nav>
 
       {showScanner && !scannedBooking && (
         <QRScanner
