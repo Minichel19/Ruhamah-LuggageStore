@@ -89,7 +89,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ⭐ Reviews Section — NEW */}
       <section className="bg-yellow-50 py-16 px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">What Our Customers Say</h2>
@@ -101,6 +100,48 @@ export default async function Home() {
         <h2 className="text-3xl font-bold mb-6">Find Us on the Map</h2>
         <Map />
       </section>
+
+      <footer className="bg-gray-900 text-white py-8 px-8 mt-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            <div>
+              <h3 className="font-bold mb-3">Ruhamah LuggageStore</h3>
+              <p className="text-sm text-gray-400">
+                2801 1st Ave Ste A<br/>
+                Seattle, WA 98121
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold mb-3">Services</h3>
+              <ul className="space-y-1 text-sm text-gray-400">
+                <li><Link href="/book" className="hover:text-white">Book Storage</Link></li>
+                <li><Link href="/support" className="hover:text-white">Support</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-3">Legal</h3>
+              <ul className="space-y-1 text-sm text-gray-400">
+                <li><Link href="/terms" className="hover:text-white">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="hover:text-white">Privacy Policy</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-3">Contact</h3>
+              <ul className="space-y-1 text-sm text-gray-400">
+                <li><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
+                <li>
+                  <a href="mailto:hello@updates.lugagestore.com" className="hover:text-white">
+                    Email
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
+            © 2026 Ruhamah LuggageStore. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
