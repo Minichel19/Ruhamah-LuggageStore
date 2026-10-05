@@ -1,19 +1,42 @@
+import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
-PS C:\Users\Ruhamah LLC\ruhamah-luggagestore> mkdir app\api\upload
-mkdir : An item with the specified name C:\Users\Ruhamah LLC\ruhamah-luggagestore\app\api\upload already exists.
-At line:1 char:1
-+ mkdir app\api\upload
-+ ~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ResourceExists: (C:\Users\Ruhama...\app\api\upload:String) [New-Item], IOException
-    + FullyQualifiedErrorId : DirectoryExist,Microsoft.PowerShell.Commands.NewItemCommand
+export async function POST(req: Request) {
+  const session = (await cookies()).get('admin_session');
+  if (!session?.value) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-PS C:\Users\Ruhamah LLC\ruhamah-luggagestore> pwd
+  const formData = await req.formData();
+  const file = formData.get('photo') as File;
+  const bookingId = formData.get('bookingId') as string;
 
-Path
-----
-C:\Users\Ruhamah LLC\ruhamah-luggagestore
+  if (!file || !bookingId) {
+    return NextResponse.json({ error: 'Missing file or booking ID' }, { status: 400 });
+  }
 
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
-PS C:\Users\Ruhamah LLC\ruhamah-luggagestore> C:\Users\Ruhamah LLC\ruhamah-luggagestore
-PS C:\Users\Ruhamah LLC\ruhamah-luggagestore> notepad app\api\upload\route.ts
-PS C:\Users\Ruhamah LLC\ruhamah-luggagestore>
+  const filename = `${bookingId}-${Date.now()}.jpg`;
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from('bag-photos')
+    .upload(filename, buffer, { contentType: 'image/jpeg' });
+
+  if (uploadError) {
+    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+  }
+
+  const { data: { publicUrl } } = supabaseAdmin.storage
+    .from('bag-photos')
+    .getPublicUrl(filename);
+
+  await supabaseAdmin
+    .from('bookings')
+    .update({ photo_url: publicUrl })
+    .eq('id', bookingId);
+
+  return NextResponse.json({ url: publicUrl });
+}
