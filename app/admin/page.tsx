@@ -189,7 +189,7 @@ export default function Admin() {
               <p className="text-sm text-blue-100">Role: {role}</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => { setShowScanner(true); setScannedBooking(null); }}
               className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50"
@@ -201,6 +201,13 @@ export default function Admin() {
             </a>
             <a href="/admin/analytics" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
               Analytics
+            </a>
+            <a
+              href="/api/export"
+              download
+              className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700"
+            >
+              Export Excel
             </a>
             {isOwner && (
               <a href="/admin/staff" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
