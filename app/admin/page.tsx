@@ -11,6 +11,7 @@ export default function Admin() {
   const [showScanner, setShowScanner] = useState(false);
   const [scannedBooking, setScannedBooking] = useState<any>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [activeTab, setActiveTab] = useState<'current' | 'upcoming' | 'past'>('current');
   const router = useRouter();
 
   useEffect(() => {
@@ -177,7 +178,7 @@ export default function Admin() {
 
   return (
     <main
-      className="min-h-screen bg-cover bg-center bg-fixed pb-28"
+      className="min-h-screen bg-cover bg-center bg-fixed pb-36"
       style={{ backgroundImage: "url('/usa-flag.jpg')" }}
     >
       {/* Header — title only */}
@@ -195,14 +196,14 @@ export default function Admin() {
               onClick={() => setShowSettings(!showSettings)}
               className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50"
             >
-              {showSettings ? '▲ Hide Settings' : '▼ Store Settings'}
+              {showSettings ? '▲ Hide Settings' : '⚙️ Store Settings'}
             </button>
           )}
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto p-8">
-        {/* Collapsible Settings — only shows when clicked */}
+        {/* Collapsible Settings */}
         {isOwner && showSettings && (
           <section className="bg-white rounded-lg shadow p-6 mb-8 border-t-4 border-blue-900">
             <div className="flex items-center justify-between mb-4">
@@ -279,49 +280,86 @@ export default function Admin() {
           </section>
         )}
 
-        <BookingTable title="🔵 Current (Today)" items={current} color="bg-blue-800" />
-        <BookingTable title="🟢 Upcoming" items={upcoming} color="bg-green-700" />
-        <BookingTable title="⚫ Past (Picked Up)" items={past} color="bg-gray-600" />
+        {/* Booking tabs show only the active section */}
+        {activeTab === 'current' && <BookingTable title="🔵 Current (Today)" items={current} color="bg-blue-800" />}
+        {activeTab === 'upcoming' && <BookingTable title="🟢 Upcoming" items={upcoming} color="bg-green-700" />}
+        {activeTab === 'past' && <BookingTable title="⚫ Past (Picked Up)" items={past} color="bg-gray-600" />}
       </div>
 
-      {/* Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar — two rows */}
       <nav className="fixed bottom-0 left-0 right-0 bg-blue-900 text-white shadow-2xl z-40 border-t-4 border-red-600">
-        <div className="max-w-6xl mx-auto flex justify-around items-center py-2 overflow-x-auto">
+
+        {/* Top row: section switcher */}
+        <div className="flex justify-around border-b border-blue-700">
+          <button
+            onClick={() => { setActiveTab('current'); setShowSettings(false); }}
+            className={`flex-1 py-2 text-center transition-colors ${activeTab === 'current' && !showSettings ? 'bg-blue-700 font-bold' : 'hover:bg-blue-800'}`}
+          >
+            <div className="text-lg">🔵</div>
+            <div className="text-xs">Current ({current.length})</div>
+          </button>
+          <button
+            onClick={() => { setActiveTab('upcoming'); setShowSettings(false); }}
+            className={`flex-1 py-2 text-center transition-colors ${activeTab === 'upcoming' && !showSettings ? 'bg-green-700 font-bold' : 'hover:bg-blue-800'}`}
+          >
+            <div className="text-lg">🟢</div>
+            <div className="text-xs">Upcoming ({upcoming.length})</div>
+          </button>
+          <button
+            onClick={() => { setActiveTab('past'); setShowSettings(false); }}
+            className={`flex-1 py-2 text-center transition-colors ${activeTab === 'past' && !showSettings ? 'bg-gray-700 font-bold' : 'hover:bg-blue-800'}`}
+          >
+            <div className="text-lg">⚫</div>
+            <div className="text-xs">Past ({past.length})</div>
+          </button>
+          {isOwner && (
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`flex-1 py-2 text-center transition-colors ${showSettings ? 'bg-yellow-600 font-bold' : 'hover:bg-blue-800'}`}
+            >
+              <div className="text-lg">⚙️</div>
+              <div className="text-xs">Settings</div>
+            </button>
+          )}
+        </div>
+
+        {/* Bottom row: action buttons */}
+        <div className="flex justify-around items-center py-2 overflow-x-auto">
           <button
             onClick={() => { setShowScanner(true); setScannedBooking(null); }}
-            className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]"
+            className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]"
           >
-            <span className="text-2xl">📷</span>
+            <span className="text-xl">📷</span>
             <span className="text-xs mt-1">Scan QR</span>
           </button>
 
-          <a href="/admin/calendar" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]">
-            <span className="text-2xl">📅</span>
+          <a href="/admin/calendar" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
+            <span className="text-xl">📅</span>
             <span className="text-xs mt-1">Calendar</span>
           </a>
 
-          <a href="/admin/analytics" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]">
-            <span className="text-2xl">📊</span>
+          <a href="/admin/analytics" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
+            <span className="text-xl">📊</span>
             <span className="text-xs mt-1">Analytics</span>
           </a>
 
-          <a href="/api/export" download className="flex flex-col items-center px-3 py-2 hover:bg-green-700 rounded min-w-[70px]">
-            <span className="text-2xl">📥</span>
+          <a href="/api/export" download className="flex flex-col items-center px-3 py-2 hover:bg-green-700 rounded min-w-[64px]">
+            <span className="text-xl">📥</span>
             <span className="text-xs mt-1">Export</span>
           </a>
 
           {isOwner && (
-            <a href="/admin/staff" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[70px]">
-              <span className="text-2xl">👥</span>
+            <a href="/admin/staff" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
+              <span className="text-xl">👥</span>
               <span className="text-xs mt-1">Staff</span>
             </a>
           )}
 
           <button
             onClick={logout}
-            className="flex flex-col items-center px-3 py-2 hover:bg-red-700 rounded min-w-[70px]"
+            className="flex flex-col items-center px-3 py-2 hover:bg-red-700 rounded min-w-[64px]"
           >
-            <span className="text-2xl">🚪</span>
+            <span className="text-xl">🚪</span>
             <span className="text-xs mt-1">Logout</span>
           </button>
         </div>
