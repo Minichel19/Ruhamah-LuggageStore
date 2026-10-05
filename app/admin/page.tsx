@@ -15,9 +15,7 @@ export default function Admin() {
       .then(setBookings)
       .catch(() => router.push('/admin/login'));
 
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(setSettings);
+    fetch('/api/settings').then(r => r.json()).then(setSettings);
 
     fetch('/api/admin/me')
       .then(r => r.ok ? r.json() : { role: 'staff' })
@@ -41,11 +39,7 @@ export default function Admin() {
     formData.append('photo', file);
     formData.append('bookingId', bookingId);
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
     if (res.ok) {
       alert('Photo uploaded!');
       location.reload();
@@ -74,6 +68,77 @@ export default function Admin() {
   if (!settings) return <main className="p-8">Loading...</main>;
 
   const isOwner = role === 'owner';
+  const today = new Date().toISOString().split('T')[0];
+
+  const upcoming = bookings.filter(b => b.dropoff_date > today && b.status !== 'picked_up');
+  const current = bookings.filter(b => b.dropoff_date <= today && b.status !== 'picked_up');
+  const past = bookings.filter(b => b.status === 'picked_up');
+
+  const BookingTable = ({ title, items, color }: { title: string; items: any[]; color: string }) => (
+    <section className="bg-white rounded-lg shadow overflow-hidden mb-8">
+      <div className={`${color} px-6 py-4`}>
+        <h2 className="text-xl font-bold text-white">{title} ({items.length})</h2>
+      </div>
+      {items.length === 0 ? (
+        <div className="p-6 text-center text-gray-500">No bookings</div>
+      ) : (
+        <table className="w-full">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Customer</th>
+              <th className="p-3 text-left">Drop-off</th>
+              <th className="p-3 text-left">Pick-up</th>
+              <th className="p-3 text-left">Bags</th>
+              <th className="p-3 text-left">Total</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((b) => (
+              <tr key={b.id} className="border-b">
+                <td className="p-3">
+                  {b.customer_name}<br/>
+                  <span className="text-sm text-gray-500">{b.customer_email}</span>
+                </td>
+                <td className="p-3">{b.dropoff_date}</td>
+                <td className="p-3">{b.pickup_date}</td>
+                <td className="p-3">{b.bag_count}</td>
+                <td className="p-3">${b.total_price}</td>
+                <td className="p-3">{b.status}</td>
+                <td className="p-3 space-x-1">
+                  {b.status === 'paid' && (
+                    <>
+                      <label className="bg-purple-600 text-white px-3 py-1 rounded text-sm cursor-pointer inline-block">
+                        Take Photo
+                        <input type="file" accept="image/*" capture="environment" className="hidden"
+                          onChange={(e) => uploadPhoto(e, b.id)} />
+                      </label>
+                      <button onClick={() => updateStatus(b.id, 'stored')}
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                        Mark Stored
+                      </button>
+                    </>
+                  )}
+                  {b.status === 'stored' && (
+                    <button onClick={() => updateStatus(b.id, 'picked_up')}
+                      className="bg-green-600 text-white px-3 py-1 rounded text-sm">
+                      Mark Picked Up
+                    </button>
+                  )}
+                  {b.photo_url && (
+                    <a href={b.photo_url} target="_blank" className="text-blue-600 underline text-sm inline-block">
+                      View Photo
+                    </a>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -131,7 +196,6 @@ export default function Admin() {
                   className="w-5 h-5" />
                 <span className="font-medium">Mark store as CLOSED</span>
               </label>
-
               {settings.is_closed && (
                 <input type="text" placeholder="Reason shown to customers"
                   value={settings.closed_message || ''}
@@ -147,60 +211,9 @@ export default function Admin() {
           </section>
         )}
 
-        <section className="bg-white rounded-lg shadow overflow-hidden">
-          <h2 className="text-xl font-bold p-6 border-b">Bookings</h2>
-          <table className="w-full">
-            <thead className="bg-blue-900 text-white">
-              <tr>
-                <th className="p-3 text-left">Customer</th>
-                <th className="p-3 text-left">Drop-off</th>
-                <th className="p-3 text-left">Pick-up</th>
-                <th className="p-3 text-left">Bags</th>
-                <th className="p-3 text-left">Total</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((b) => (
-                <tr key={b.id} className="border-b">
-                  <td className="p-3">{b.customer_name}<br/><span className="text-sm text-gray-500">{b.customer_email}</span></td>
-                  <td className="p-3">{b.dropoff_date}</td>
-                  <td className="p-3">{b.pickup_date}</td>
-                  <td className="p-3">{b.bag_count}</td>
-                  <td className="p-3">${b.total_price}</td>
-                  <td className="p-3">{b.status}</td>
-                  <td className="p-3 space-x-1">
-                    {b.status === 'paid' && (
-                      <>
-                        <label className="bg-purple-600 text-white px-3 py-1 rounded text-sm cursor-pointer inline-block">
-                          Take Photo
-                          <input type="file" accept="image/*" capture="environment" className="hidden"
-                            onChange={(e) => uploadPhoto(e, b.id)} />
-                        </label>
-                        <button onClick={() => updateStatus(b.id, 'stored')}
-                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                          Mark Stored
-                        </button>
-                      </>
-                    )}
-                    {b.status === 'stored' && (
-                      <button onClick={() => updateStatus(b.id, 'picked_up')}
-                        className="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                        Mark Picked Up
-                      </button>
-                    )}
-                    {b.photo_url && (
-                      <a href={b.photo_url} target="_blank" className="text-blue-600 underline text-sm inline-block">
-                        View Photo
-                      </a>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+        <BookingTable title="Current (Today)" items={current} color="bg-blue-700" />
+        <BookingTable title="Upcoming" items={upcoming} color="bg-yellow-600" />
+        <BookingTable title="Past (Picked Up)" items={past} color="bg-gray-600" />
       </div>
     </main>
   );
