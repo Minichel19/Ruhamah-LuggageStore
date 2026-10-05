@@ -16,6 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Ruhamah LuggageStore | Safe Luggage Storage in Seattle",
   description: "Secure luggage storage in Belltown, Seattle. Drop off your bags and explore the city.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
