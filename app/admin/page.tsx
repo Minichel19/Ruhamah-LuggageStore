@@ -1,12 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import QRScanner from '@/components/QRScanner';
 
 export default function Admin() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [role, setRole] = useState<string>('staff');
   const [saving, setSaving] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedBooking, setScannedBooking] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -184,6 +187,12 @@ export default function Admin() {
             </div>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={() => { setShowScanner(true); setScannedBooking(null); }}
+              className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50"
+            >
+              Scan QR
+            </button>
             <a href="/admin/calendar" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
               Calendar
             </a>
@@ -258,6 +267,87 @@ export default function Admin() {
         <BookingTable title="🟢 Upcoming" items={upcoming} color="bg-green-700" />
         <BookingTable title="⚫ Past (Picked Up)" items={past} color="bg-gray-600" />
       </div>
+
+      {showScanner && !scannedBooking && (
+        <QRScanner
+          onClose={() => setShowScanner(false)}
+          onScan={(booking) => setScannedBooking(booking)}
+        />
+      )}
+
+      {scannedBooking && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-green-700">&#10003; Booking Found</h2>
+              <button
+                onClick={() => { setScannedBooking(null); setShowScanner(false); }}
+                className="text-gray-500 hover:text-gray-800 text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded mb-4">
+              <p className="mb-2"><strong>Customer:</strong> {scannedBooking.customer_name}</p>
+              <p className="mb-2"><strong>Email:</strong> {scannedBooking.customer_email}</p>
+              <p className="mb-2"><strong>Phone:</strong> {scannedBooking.customer_phone || 'N/A'}</p>
+              <p className="mb-2"><strong>Drop-off:</strong> {scannedBooking.dropoff_date}</p>
+              <p className="mb-2"><strong>Pick-up:</strong> {scannedBooking.pickup_date}</p>
+              <p className="mb-2"><strong>Bags:</strong> {scannedBooking.bag_count}</p>
+              <p className="mb-2"><strong>Total:</strong> ${scannedBooking.total_price}</p>
+              <p className="mb-2"><strong>Status:</strong> {scannedBooking.status}</p>
+              {scannedBooking.notes && (
+                <p className="mb-2 text-blue-700 bg-blue-50 p-2 rounded"><strong>Notes:</strong> {scannedBooking.notes}</p>
+              )}
+              {scannedBooking.photo_url && (
+                <img src={scannedBooking.photo_url} alt="Bag photo" className="mt-3 rounded max-w-full" />
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              {scannedBooking.status === 'paid' && (
+                <button
+                  onClick={async () => {
+                    await fetch('/api/bookings', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: scannedBooking.id, status: 'stored' }),
+                    });
+                    alert('Marked as Stored');
+                    location.reload();
+                  }}
+                  className="flex-1 bg-green-600 text-white py-3 rounded font-semibold hover:bg-green-700"
+                >
+                  Mark Stored
+                </button>
+              )}
+              {scannedBooking.status === 'stored' && (
+                <button
+                  onClick={async () => {
+                    await fetch('/api/bookings', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: scannedBooking.id, status: 'picked_up' }),
+                    });
+                    alert('Marked as Picked Up');
+                    location.reload();
+                  }}
+                  className="flex-1 bg-green-700 text-white py-3 rounded font-semibold hover:bg-green-800"
+                >
+                  Mark Picked Up
+                </button>
+              )}
+              <button
+                onClick={() => { setScannedBooking(null); setShowScanner(true); }}
+                className="flex-1 bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700"
+              >
+                Scan Another
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
