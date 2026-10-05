@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import QRCode from 'qrcode';
+import { sendBookingConfirmation, sendOwnerNotification } from '@/lib/email/send';
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     const m = session.metadata;
     const qrCode = await QRCode.toDataURL(session.id);
 
-    await supabaseAdmin.from('bookings').insert({
+    const booking = {
       customer_name: m.name,
       customer_email: m.email,
       customer_phone: m.phone,
@@ -31,7 +32,18 @@ export async function POST(req: Request) {
       qr_code: qrCode,
       status: 'paid',
       notes: m.notes || null,
-    });
+    };
+
+    const { data: saved } = await supabaseAdmin
+      .from('bookings')
+      .insert(booking)
+      .select()
+      .single();
+
+    if (saved) {
+      await sendBookingConfirmation(saved);
+      await sendOwnerNotification(saved);
+    }
   }
 
   return NextResponse.json({ received: true });
