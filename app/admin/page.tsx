@@ -6,7 +6,7 @@ import QRScanner from '@/components/QRScanner';
 export default function Admin() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
-  const [role, setRole] = useState<string>('staff');
+  const [role, setRole] = useState<string>('loading');
   const [saving, setSaving] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scannedBooking, setScannedBooking] = useState<any>(null);
@@ -21,8 +21,11 @@ export default function Admin() {
     fetch('/api/settings').then(r => r.json()).then(setSettings);
 
     fetch('/api/admin/me')
-      .then(r => r.ok ? r.json() : { role: 'staff' })
-      .then(d => setRole(d.role || 'staff'));
+      .then(r => r.ok ? r.json() : { role: 'unauthorized' })
+      .then(d => {
+        console.log('Role from API:', d.role);
+        setRole(d.role || 'unauthorized');
+      });
   }, [router]);
 
   async function updateStatus(id: string, status: string) {
@@ -183,7 +186,7 @@ export default function Admin() {
             <span className="text-4xl">🇺🇸</span>
             <div>
               <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
-              <p className="text-sm text-blue-100">Staff Dashboard</p>
+              <p className="text-sm text-blue-100">Role: {role}</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -240,6 +243,20 @@ export default function Admin() {
                 <input type="text" placeholder="e.g., Closed Dec 25 for Christmas"
                   value={settings.special_hours || ''}
                   onChange={e => setSettings({ ...settings, special_hours: e.target.value })}
+                  className="w-full border p-2 rounded" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Contact Email</label>
+                <input type="email" placeholder="hello@lugagestore.com"
+                  value={settings.contact_email || ''}
+                  onChange={e => setSettings({ ...settings, contact_email: e.target.value })}
+                  className="w-full border p-2 rounded" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Contact Phone</label>
+                <input type="tel" placeholder="(206) 555-1234"
+                  value={settings.contact_phone || ''}
+                  onChange={e => setSettings({ ...settings, contact_phone: e.target.value })}
                   className="w-full border p-2 rounded" />
               </div>
             </div>
