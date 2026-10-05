@@ -103,6 +103,11 @@ export default function Admin() {
                       {b.notes}
                     </div>
                   )}
+                  {b.photo_url && (
+                    <div className="text-sm text-green-700 bg-green-50 p-1 rounded mt-1 inline-block">
+                      &#128247; Photo on file
+                    </div>
+                  )}
                 </td>
                 <td className="p-3">{b.dropoff_date}</td>
                 <td className="p-3">{b.pickup_date}</td>
@@ -151,7 +156,7 @@ export default function Admin() {
                     </>
                   )}
                   {b.photo_url && (
-                    <a href={b.photo_url} target="_blank" className="text-blue-600 underline text-sm inline-block ml-2">
+                    <a href={b.photo_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm inline-block ml-2">
                       View Photo
                     </a>
                   )}
