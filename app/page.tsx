@@ -12,11 +12,19 @@ export default async function Home() {
         className="relative bg-cover bg-center"
         style={{ backgroundImage: "url('/seattle.jpg')" }}
       >
-        <div className="absolute inset-0 bg-black/50"></div>
+        {/* Lighter overlay so Seattle image shows through */}
+        <div className="absolute inset-0 bg-black/20"></div>
 
-        <header className="relative bg-blue-900/80 text-white py-6 px-8">
-          <h1 className="text-3xl font-bold">{settings?.business_name}</h1>
-          <p className="text-blue-200">Safe luggage storage in Seattle</p>
+        <header className="relative bg-blue-900/70 text-white py-6 px-8">
+          <div className="flex items-center gap-3">
+            <div className="bg-white rounded-lg p-2 shadow-lg">
+              <span className="text-3xl">🧳</span>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">{settings?.business_name}</h1>
+              <p className="text-blue-200">Safe luggage storage in Seattle</p>
+            </div>
+          </div>
           {settings?.is_closed && (
             <div className="bg-red-600 text-white text-center py-3 mt-4 rounded">
               ⚠ {settings?.closed_message || 'Currently closed'}
@@ -30,10 +38,10 @@ export default async function Home() {
         </header>
 
         <section className="relative max-w-4xl mx-auto py-24 px-8 text-center">
-          <h2 className="text-5xl font-bold mb-6 text-white drop-shadow-lg">
+          <h2 className="text-5xl font-bold mb-6 text-white drop-shadow-2xl">
             Store Your Bags. Explore Seattle.
           </h2>
-          <p className="text-xl text-white mb-8 drop-shadow">
+          <p className="text-xl text-white mb-8 drop-shadow-lg">
             Drop off your luggage at our secure location in Belltown. Flat rate:{' '}
             <strong>${settings?.price_per_bag}/bag/day</strong>.
           </p>
