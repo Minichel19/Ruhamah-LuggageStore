@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 export default function BookPage() {
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', dropoff: '', pickup: '', bags: 1,
+    name: '', email: '', phone: '', dropoff: '', pickup: '', bags: 1, notes: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -50,6 +50,17 @@ export default function BookPage() {
           <label className="block text-sm font-medium">Number of Bags</label>
           <input required type="number" min="1" className="w-full border p-3 rounded"
             value={form.bags} onChange={e => setForm({...form, bags: +e.target.value})} />
+
+          <label className="block text-sm font-medium">
+            Special Notes (optional)
+          </label>
+          <textarea
+            placeholder="Anything we should know? (fragile items, large bags, questions, etc.)"
+            className="w-full border p-3 rounded"
+            rows={3}
+            value={form.notes}
+            onChange={e => setForm({...form, notes: e.target.value})}
+          />
 
           <div className="bg-blue-50 p-4 rounded">
             <p className="text-lg font-bold">Total: ${total.toFixed(2)}</p>

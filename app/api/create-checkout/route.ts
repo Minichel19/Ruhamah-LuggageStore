@@ -23,6 +23,7 @@ export async function POST(req: Request) {
       dropoff: body.dropoff,
       pickup: body.pickup,
       bags: body.bags.toString(),
+      notes: body.notes || '',
     },
   });
 

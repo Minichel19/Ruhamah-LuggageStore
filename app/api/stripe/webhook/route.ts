@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       stripe_session_id: session.id,
       qr_code: qrCode,
       status: 'paid',
+      notes: m.notes || null,
     });
   }
 
