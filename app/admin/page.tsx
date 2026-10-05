@@ -98,6 +98,11 @@ export default function Admin() {
                 <td className="p-3">
                   {b.customer_name}<br/>
                   <span className="text-sm text-gray-500">{b.customer_email}</span>
+                  {b.notes && (
+                    <div className="text-sm text-blue-700 bg-blue-50 p-2 rounded mt-1">
+                      {b.notes}
+                    </div>
+                  )}
                 </td>
                 <td className="p-3">{b.dropoff_date}</td>
                 <td className="p-3">{b.pickup_date}</td>
@@ -124,8 +129,29 @@ export default function Admin() {
                       Mark Picked Up
                     </button>
                   )}
+                  {b.status === 'picked_up' && (
+                    <>
+                      <a
+                        href={`https://wa.me/${b.customer_phone?.replace(/[^0-9]/g, '') || ''}?text=${encodeURIComponent(
+                          `Hi ${b.customer_name}, thank you for choosing Ruhamah LuggageStore! We'd love your feedback: https://lugagestore.com/review?booking=${b.id}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-yellow-500 text-white px-3 py-1 rounded text-sm inline-block"
+                      >
+                        Send Review
+                      </a>
+                      <a
+                        href={`/review?booking=${b.id}`}
+                        target="_blank"
+                        className="text-blue-600 underline text-sm ml-2 inline-block"
+                      >
+                        Review Link
+                      </a>
+                    </>
+                  )}
                   {b.photo_url && (
-                    <a href={b.photo_url} target="_blank" className="text-blue-600 underline text-sm inline-block">
+                    <a href={b.photo_url} target="_blank" className="text-blue-600 underline text-sm inline-block ml-2">
                       View Photo
                     </a>
                   )}
@@ -143,7 +169,6 @@ export default function Admin() {
       className="min-h-screen bg-cover bg-center bg-fixed"
       style={{ backgroundImage: "url('/usa-flag.jpg')" }}
     >
-      {/* Header with USA flag theme */}
       <div className="bg-gradient-to-r from-blue-900 via-red-600 to-blue-900 text-white py-6 px-8 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
