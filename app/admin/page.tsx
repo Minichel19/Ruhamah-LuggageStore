@@ -75,7 +75,7 @@ export default function Admin() {
   const past = bookings.filter(b => b.status === 'picked_up');
 
   const BookingTable = ({ title, items, color }: { title: string; items: any[]; color: string }) => (
-    <section className="bg-white rounded-lg shadow overflow-hidden mb-8">
+    <section className="bg-white rounded-lg shadow overflow-hidden mb-8 border-t-4 border-blue-900">
       <div className={`${color} px-6 py-4`}>
         <h2 className="text-xl font-bold text-white">{title} ({items.length})</h2>
       </div>
@@ -115,14 +115,14 @@ export default function Admin() {
                           onChange={(e) => uploadPhoto(e, b.id)} />
                       </label>
                       <button onClick={() => updateStatus(b.id, 'stored')}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                        className="bg-green-600 text-white px-3 py-1 rounded text-sm">
                         Mark Stored
                       </button>
                     </>
                   )}
                   {b.status === 'stored' && (
                     <button onClick={() => updateStatus(b.id, 'picked_up')}
-                      className="bg-green-600 text-white px-3 py-1 rounded text-sm">
+                      className="bg-green-700 text-white px-3 py-1 rounded text-sm">
                       Mark Picked Up
                     </button>
                   )}
@@ -141,25 +141,34 @@ export default function Admin() {
   );
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    <main className="min-h-screen bg-gray-50">
+      {/* Header with USA flag theme */}
+      <div className="bg-gradient-to-r from-blue-900 via-red-600 to-blue-900 text-white py-6 px-8 shadow-lg">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">🇺🇸</span>
+            <div>
+              <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
+              <p className="text-sm text-blue-100">Staff Dashboard</p>
+            </div>
+          </div>
           <div className="flex gap-3">
             {isOwner && (
-              <a href="/admin/staff" className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+              <a href="/admin/staff" className="bg-white text-blue-900 px-4 py-2 rounded font-semibold hover:bg-blue-50">
                 Manage Staff →
               </a>
             )}
-            <button onClick={logout} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+            <button onClick={logout} className="bg-red-700 text-white px-4 py-2 rounded font-semibold hover:bg-red-800 border border-white">
               Logout
             </button>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto p-8">
         {isOwner && (
-          <section className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4">Store Status & Hours</h2>
+          <section className="bg-white rounded-lg shadow p-6 mb-8 border-t-4 border-blue-900">
+            <h2 className="text-xl font-bold mb-4 text-blue-900">Store Status & Hours</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -211,9 +220,9 @@ export default function Admin() {
           </section>
         )}
 
-        <BookingTable title="Current (Today)" items={current} color="bg-blue-700" />
-        <BookingTable title="Upcoming" items={upcoming} color="bg-yellow-600" />
-        <BookingTable title="Past (Picked Up)" items={past} color="bg-gray-600" />
+        <BookingTable title="🔵 Current (Today)" items={current} color="bg-blue-800" />
+        <BookingTable title="🟢 Upcoming" items={upcoming} color="bg-green-700" />
+        <BookingTable title="⚫ Past (Picked Up)" items={past} color="bg-gray-600" />
       </div>
     </main>
   );
