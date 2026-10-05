@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { cookies } from 'next/headers';
+import { sendReviewRequest } from '@/lib/email/send';
 
 async function isAuthenticated() {
   const session = (await cookies()).get('admin_session');
@@ -37,6 +38,18 @@ export async function PATCH(req: Request) {
   }
 
   const { id, status } = await req.json();
-  await supabaseAdmin.from('bookings').update({ status }).eq('id', id);
+
+  const { data: updated } = await supabaseAdmin
+    .from('bookings')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single();
+
+  // Auto-send review request email when marked as picked up
+  if (status === 'picked_up' && updated) {
+    await sendReviewRequest(updated);
+  }
+
   return NextResponse.json({ ok: true });
 }

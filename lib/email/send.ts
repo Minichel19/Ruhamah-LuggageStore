@@ -84,3 +84,50 @@ export async function sendOwnerNotification(booking: any) {
     console.error('Failed to send owner email:', error);
   }
 }
+export async function sendReviewRequest(booking: any) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log('RESEND_API_KEY not set, skipping review request');
+    return;
+  }
+
+  const reviewUrl = `https://lugagestore.com/review?booking=${booking.id}`;
+  const photoUrl = booking.photo_url
+    ? `https://lugagestore.com/success?session_id=${booking.stripe_session_id}`
+    : null;
+
+  try {
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: booking.customer_email,
+      subject: `How was your experience, ${booking.customer_name}?`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #1e3a8a;">Thanks for choosing us!</h1>
+          <p>Hi ${booking.customer_name},</p>
+          <p>We hope you had a great experience storing your bags with Ruhamah LuggageStore.</p>
+          <p>Would you take a moment to leave us a review? It really helps us serve you better.</p>
+
+          <a href="${reviewUrl}" style="background: #eab308; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin: 20px 0;">
+            Leave a Review
+          </a>
+
+          ${photoUrl ? `
+          <p style="margin-top: 20px;">You can also view the photo of your stored bags:</p>
+          <a href="${photoUrl}" style="color: #1e3a8a;">View Bag Photo</a>
+          ` : ''}
+
+          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+            Thank you for your business!<br>
+            Ruhamah LuggageStore<br>
+            2801 1st Ave Ste A, Seattle, WA 98121
+          </p>
+        </div>
+      `,
+    });
+    console.log('Review request sent to', booking.customer_email);
+  } catch (error) {
+    console.error('Failed to send review request:', error);
+  }
+}
