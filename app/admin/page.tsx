@@ -34,11 +34,9 @@ export default function Admin() {
   async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>, bookingId: string) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('photo', file);
     formData.append('bookingId', bookingId);
-
     const res = await fetch('/api/upload', { method: 'POST', body: formData });
     if (res.ok) {
       alert('Photo uploaded!');
@@ -141,7 +139,10 @@ export default function Admin() {
   );
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main
+      className="min-h-screen bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: "url('/usa-flag.jpg')" }}
+    >
       {/* Header with USA flag theme */}
       <div className="bg-gradient-to-r from-blue-900 via-red-600 to-blue-900 text-white py-6 px-8 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -165,7 +166,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-8 bg-white/90 rounded-lg shadow-2xl mt-8 mb-8">
         {isOwner && (
           <section className="bg-white rounded-lg shadow p-6 mb-8 border-t-4 border-blue-900">
             <h2 className="text-xl font-bold mb-4 text-blue-900">Store Status & Hours</h2>
