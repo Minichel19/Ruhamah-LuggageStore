@@ -45,7 +45,12 @@ export default function StaffPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Staff Management</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Staff Management</h1>
+          <a href="/admin" className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+            Back to Dashboard
+          </a>
+        </div>
 
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-bold mb-4">Add New Staff</h2>
@@ -94,10 +99,6 @@ export default function StaffPage() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        <div className="mt-6 text-center">
-          <a href="/admin" className="text-blue-600 hover:underline">← Back to Dashboard</a>
         </div>
       </div>
     </main>
