@@ -136,6 +136,23 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Store Photo — only shows if uploaded from admin */}
+      {settings?.store_photo_url && (
+        <section className="max-w-4xl mx-auto py-16 px-4 md:px-8">
+          <h2 className="text-3xl font-bold mb-6 text-center">Our Store</h2>
+          <div className="rounded-lg overflow-hidden shadow-xl">
+            <img
+              src={settings.store_photo_url}
+              alt="Ruhamah LuggageStore"
+              className="w-full h-auto"
+            />
+          </div>
+          <p className="text-center text-gray-600 mt-4">
+            Visit us at {settings?.address || '2801 1st Ave Ste A, Seattle, WA 98121'}
+          </p>
+        </section>
+      )}
+
       <section className="bg-blue-50 py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-6">About Ruhamah LuggageStore</h2>

@@ -51,6 +51,27 @@ export default function Admin() {
     }
   }
 
+  async function uploadStorePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('photo', file);
+    const res = await fetch('/api/upload-store-photo', { method: 'POST', body: fd });
+    if (res.ok) {
+      alert('Store photo uploaded!');
+      location.reload();
+    } else {
+      alert('Upload failed');
+    }
+  }
+
+  async function removeStorePhoto() {
+    if (!confirm('Remove store photo?')) return;
+    await fetch('/api/upload-store-photo', { method: 'DELETE' });
+    alert('Photo removed');
+    location.reload();
+  }
+
   async function saveSettings() {
     setSaving(true);
     await fetch('/api/settings', {
@@ -181,7 +202,7 @@ export default function Admin() {
       className="min-h-screen bg-cover bg-center bg-fixed pb-36"
       style={{ backgroundImage: "url('/usa-flag.jpg')" }}
     >
-      {/* Header — title only */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-blue-900 via-red-600 to-blue-900 text-white py-6 px-8 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -258,7 +279,52 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-4">
+            {/* Store Photo Upload */}
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="font-bold text-lg mb-3 text-blue-900">Store Photo</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Upload a photo of your store. It will appear on the homepage.
+              </p>
+
+              {settings.store_photo_url ? (
+                <div className="mb-3">
+                  <img
+                    src={settings.store_photo_url}
+                    alt="Store"
+                    className="rounded-lg max-w-xs shadow-md"
+                  />
+                  <div className="flex gap-2 mt-3">
+                    <label className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer text-sm inline-block">
+                      Replace Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={uploadStorePhoto}
+                      />
+                    </label>
+                    <button
+                      onClick={removeStorePhoto}
+                      className="bg-red-600 text-white px-4 py-2 rounded text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer inline-block">
+                  Upload Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={uploadStorePhoto}
+                  />
+                </label>
+              )}
+            </div>
+
+            <div className="mt-6 flex items-center gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={settings.is_closed || false}
                   onChange={e => setSettings({ ...settings, is_closed: e.target.checked })}
@@ -280,16 +346,13 @@ export default function Admin() {
           </section>
         )}
 
-        {/* Booking tabs show only the active section */}
         {activeTab === 'current' && <BookingTable title="🔵 Current (Today)" items={current} color="bg-blue-800" />}
         {activeTab === 'upcoming' && <BookingTable title="🟢 Upcoming" items={upcoming} color="bg-green-700" />}
         {activeTab === 'past' && <BookingTable title="⚫ Past (Picked Up)" items={past} color="bg-gray-600" />}
       </div>
 
-      {/* Bottom Navigation Bar — two rows */}
+      {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-blue-900 text-white shadow-2xl z-40 border-t-4 border-red-600">
-
-        {/* Top row: section switcher */}
         <div className="flex justify-around border-b border-blue-700">
           <button
             onClick={() => { setActiveTab('current'); setShowSettings(false); }}
@@ -323,7 +386,6 @@ export default function Admin() {
           )}
         </div>
 
-        {/* Bottom row: action buttons */}
         <div className="flex justify-around items-center py-2 overflow-x-auto">
           <button
             onClick={() => { setShowScanner(true); setScannedBooking(null); }}
@@ -332,29 +394,24 @@ export default function Admin() {
             <span className="text-xl">📷</span>
             <span className="text-xs mt-1">Scan QR</span>
           </button>
-
           <a href="/admin/calendar" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
             <span className="text-xl">📅</span>
             <span className="text-xs mt-1">Calendar</span>
           </a>
-
           <a href="/admin/analytics" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
             <span className="text-xl">📊</span>
             <span className="text-xs mt-1">Analytics</span>
           </a>
-
           <a href="/api/export" download className="flex flex-col items-center px-3 py-2 hover:bg-green-700 rounded min-w-[64px]">
             <span className="text-xl">📥</span>
             <span className="text-xs mt-1">Export</span>
           </a>
-
           {isOwner && (
             <a href="/admin/staff" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
               <span className="text-xl">👥</span>
               <span className="text-xs mt-1">Staff</span>
             </a>
           )}
-
           <button
             onClick={logout}
             className="flex flex-col items-center px-3 py-2 hover:bg-red-700 rounded min-w-[64px]"

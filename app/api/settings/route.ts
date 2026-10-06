@@ -8,9 +8,19 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
-  const session = (await cookies()).get('admin_session');
-  if (session?.value !== 'authenticated') {
+  const token = (await cookies()).get('admin_session')?.value;
+  if (!token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: session } = await supabaseAdmin
+    .from('sessions')
+    .select('role')
+    .eq('token', token)
+    .single();
+
+  if (!session || session.role !== 'owner') {
+    return NextResponse.json({ error: 'Only owners can update settings' }, { status: 403 });
   }
 
   const body = await req.json();
@@ -23,6 +33,9 @@ export async function PATCH(req: Request) {
       is_closed: body.is_closed,
       closed_message: body.closed_message,
       special_hours: body.special_hours,
+      contact_email: body.contact_email,
+      contact_phone: body.contact_phone,
+      store_photo_url: body.store_photo_url,
     })
     .eq('id', 1);
 
