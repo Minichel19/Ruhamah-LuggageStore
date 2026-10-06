@@ -84,6 +84,18 @@ export default function Admin() {
     location.reload();
   }
 
+  async function backupData() {
+    if (!confirm('Send backup to your email?')) return;
+    const res = await fetch('/api/admin/backup', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      alert(`✓ Backup sent! ${data.bookings} bookings emailed to you.`);
+    } else {
+      const d = await res.json();
+      alert('Backup failed: ' + (d.error || 'Unknown error'));
+    }
+  }
+
   async function logout() {
     await fetch('/api/admin/logout', { method: 'POST' });
     router.push('/admin/login');
@@ -339,10 +351,16 @@ export default function Admin() {
               )}
             </div>
 
-            <button onClick={saveSettings} disabled={saving}
-              className="mt-6 bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50">
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button onClick={saveSettings} disabled={saving}
+                className="bg-blue-900 text-white px-6 py-3 rounded font-semibold hover:bg-blue-800 disabled:opacity-50">
+                {saving ? 'Saving...' : 'Save Settings'}
+              </button>
+              <button onClick={backupData}
+                className="bg-green-600 text-white px-6 py-3 rounded font-semibold hover:bg-green-700">
+                📦 Backup Data to Email
+              </button>
+            </div>
           </section>
         )}
 
