@@ -132,3 +132,45 @@ export async function sendReviewRequest(booking: any) {
     console.error('Failed to send review request:', error);
   }
 }
+
+export async function sendTwoFactorCode(to: string, name: string, code: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log('RESEND_API_KEY not set, skipping 2FA email');
+    return;
+  }
+
+  try {
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: 'Your login code — Ruhamah LuggageStore',
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #1e3a8a; text-align: center;">Login Code</h1>
+          <p>Hi ${name},</p>
+          <p>Here is your 6-digit code to finish logging in:</p>
+
+          <div style="background: #f3f4f6; padding: 24px; border-radius: 8px; text-align: center; margin: 24px 0;">
+            <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #1e3a8a;">
+              ${code}
+            </div>
+          </div>
+
+          <p style="color: #6b7280; font-size: 14px;">
+            This code expires in 10 minutes. If you didn't try to log in, ignore this email and change your password immediately.
+          </p>
+
+          <p style="color: #9ca3af; font-size: 12px; margin-top: 30px; text-align: center;">
+            Ruhamah LuggageStore<br>
+            2801 1st Ave Ste A, Seattle, WA 98121
+          </p>
+        </div>
+      `,
+    });
+    console.log('2FA code sent to', to);
+  } catch (error) {
+    console.error('Failed to send 2FA code:', error);
+  }
+}

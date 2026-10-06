@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { sendTwoFactorCode } from '@/lib/email/send';
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
 
   const normalizedEmail = email.toLowerCase();
 
-  // Rate limit: block after 10 failed attempts in 5 minutes
+  // Rate limit: 10 failed attempts in 5 minutes
   const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
   const { count: failedAttempts } = await supabaseAdmin
     .from('login_attempts')
@@ -29,7 +30,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Look up staff by email
   const { data: staff } = await supabaseAdmin
     .from('staff')
     .select('*')
@@ -59,23 +59,30 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
-  const token = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  // Generate 6-digit 2FA code
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const codeHash = crypto.createHash('sha256').update(code).digest('hex');
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-  await supabaseAdmin.from('sessions').insert({
-    token,
+  // Clear any old unused codes for this staff
+  await supabaseAdmin
+    .from('two_factor_codes')
+    .delete()
+    .eq('staff_id', staff.id)
+    .eq('used', false);
+
+  await supabaseAdmin.from('two_factor_codes').insert({
     staff_id: staff.id,
-    role: staff.role,
+    code_hash: codeHash,
     expires_at: expiresAt,
   });
 
-  (await cookies()).set('admin_session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
-    maxAge: 60 * 60 * 24,
-  });
+  // Send the code via email
+  await sendTwoFactorCode(staff.email, staff.name || 'there', code);
 
-  return NextResponse.json({ success: true, role: staff.role });
+  return NextResponse.json({
+    success: true,
+    requires_2fa: true,
+    email: staff.email,
+  });
 }
