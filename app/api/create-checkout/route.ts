@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
+  // Rate limit: 5 requests per IP per minute
+  const rateCheck = await checkRateLimit(req, 'create-checkout', 5, 60);
+  if (!rateCheck.allowed) {
+    return rateLimitResponse(rateCheck.retryAfterSeconds!);
+  }
+
   const body = await req.json();
 
   const session = await stripe.checkout.sessions.create({
