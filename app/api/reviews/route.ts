@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // UUID validation regex
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -27,6 +28,12 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  // Rate limit: 3 review submissions per IP per 10 minutes
+  const rateCheck = await checkRateLimit(req, 'reviews', 3, 600);
+  if (!rateCheck.allowed) {
+    return rateLimitResponse(rateCheck.retryAfterSeconds!);
+  }
+
   const { bookingId, stars, comment, name } = await req.json();
 
   if (!stars || stars < 1 || stars > 5) {
