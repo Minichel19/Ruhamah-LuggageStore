@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Map from './Map';
 import ReviewsSection from '@/components/ReviewsSection';
+import QuickBook from '@/components/QuickBook';
 
 export default async function Home() {
   const { data: settings } = await supabase.from('settings').select('*').single();
@@ -76,6 +77,9 @@ export default async function Home() {
           </Link>
         </section>
       </div>
+
+      {/* Quick Book Date Picker */}
+      <QuickBook pricePerBag={Number(settings?.price_per_bag) || 5} />
 
       {/* Google Reviews Badge */}
       <section className="bg-white py-6 px-4 md:px-8 border-b">
