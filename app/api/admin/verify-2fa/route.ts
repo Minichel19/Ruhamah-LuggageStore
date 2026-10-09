@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
+import { logAction } from '@/lib/audit';
 
 export async function POST(req: Request) {
   const { email, code } = await req.json();
@@ -63,6 +64,9 @@ export async function POST(req: Request) {
     path: '/',
     maxAge: 60 * 60 * 24,
   });
+
+  // Log the successful login
+  await logAction('LOGIN', `Logged in as ${staff.role}`, req);
 
   return NextResponse.json({ success: true, role: staff.role });
 }

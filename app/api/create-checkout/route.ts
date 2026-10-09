@@ -3,7 +3,6 @@ import { stripe } from '@/lib/stripe';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
-  // Rate limit: 5 requests per IP per minute
   const rateCheck = await checkRateLimit(req, 'create-checkout', 5, 60);
   if (!rateCheck.allowed) {
     return rateLimitResponse(rateCheck.retryAfterSeconds!);
@@ -21,6 +20,11 @@ export async function POST(req: Request) {
       quantity: 1,
     }],
     mode: 'payment',
+    customer_creation: 'always',
+    customer_email: body.email,
+    payment_intent_data: {
+      setup_future_usage: 'off_session',
+    },
     success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/book`,
     metadata: {

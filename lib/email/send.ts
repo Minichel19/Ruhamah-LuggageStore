@@ -174,3 +174,44 @@ export async function sendTwoFactorCode(to: string, name: string, code: string) 
     console.error('Failed to send 2FA code:', error);
   }
 }
+
+export async function sendExtraBagsLink(
+  booking: { customer_name: string; customer_email: string; id: string },
+  addedBags: number,
+  amount: number,
+  paymentUrl: string
+) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log('[email] No RESEND_API_KEY — skipping extra bags email');
+    return;
+  }
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Extra bags for your booking</h2>
+      <p>Hi ${booking.customer_name},</p>
+      <p>We noticed you brought <strong>${addedBags} extra bag${addedBags > 1 ? 's' : ''}</strong> for your storage booking.</p>
+      <p>Please complete the payment of <strong>$${amount.toFixed(2)}</strong> using the link below:</p>
+      <p style="margin: 24px 0;">
+        <a href="${paymentUrl}" style="background:#000;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;">
+          Pay $${amount.toFixed(2)}
+        </a>
+      </p>
+      <p style="color:#666;font-size:13px;">Booking reference: ${booking.id.slice(0, 8)}</p>
+    </div>
+  `;
+
+  try {
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: booking.customer_email,
+      subject: `Extra bags — pay $${amount.toFixed(2)}`,
+      html,
+    });
+    console.log('Extra bags link sent to', booking.customer_email);
+  } catch (error) {
+    console.error('Failed to send extra bags email:', error);
+  }
+}

@@ -1,13 +1,27 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function BookPage() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', dropoff: '', pickup: '', bags: 1, notes: '',
   });
   const [loading, setLoading] = useState(false);
+  const [pricePerBag, setPricePerBag] = useState(5);  // fallback until settings load
 
-  const pricePerBag = 5;
+  // Fetch live price from database — cache disabled so admin updates take effect immediately
+  useEffect(() => {
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.price_per_bag != null) {
+          setPricePerBag(Number(data.price_per_bag));
+        }
+      })
+      .catch(() => {
+        // keep fallback of 5 on error
+      });
+  }, []);
+
   const days = form.dropoff && form.pickup
     ? Math.max(1, Math.ceil((new Date(form.pickup).getTime() - new Date(form.dropoff).getTime()) / (1000 * 60 * 60 * 24)))
     : 1;
