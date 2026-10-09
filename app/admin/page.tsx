@@ -158,6 +158,35 @@ export default function Admin() {
     );
   };
 
+  // Dropdown for freely changing status
+  const StatusDropdown = ({
+    id,
+    status,
+  }: {
+    id: string;
+    status: string;
+  }) => (
+    <div className="space-y-1">
+      <StatusBadge status={status} />
+      <select
+        value={status}
+        onChange={(e) => {
+          const newStatus = e.target.value;
+          if (newStatus === status) return;
+          if (confirm(`Change status to "${newStatus}"?`)) {
+            updateStatus(id, newStatus);
+          }
+        }}
+        className="border rounded px-2 py-1 text-xs bg-white cursor-pointer w-full"
+      >
+        <option value="paid">🟡 PAID</option>
+        <option value="stored">🟢 STORED</option>
+        <option value="picked_up">✅ PICKED UP</option>
+        <option value="no_show">🔴 NO-SHOW</option>
+      </select>
+    </div>
+  );
+
   const BookingTable = ({ title, items, color }: { title: string; items: any[]; color: string }) => (
     <section className="bg-white rounded-lg shadow overflow-hidden mb-8 border-t-4 border-blue-900">
       <div className={`${color} px-6 py-4`}>
@@ -225,7 +254,9 @@ export default function Admin() {
                       </div>
                     )}
                   </td>
-                  <td className="p-3"><StatusBadge status={b.status} /></td>
+                  <td className="p-3">
+                    <StatusDropdown id={b.id} status={b.status} />
+                  </td>
                   <td className="p-3 space-x-1">
                     {b.status === 'paid' && (
                       <>
