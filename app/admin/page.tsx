@@ -19,7 +19,6 @@ export default function Admin() {
 
   const router = useRouter();
 
-  // Silent reload — used on mount + interval
   async function loadBookings() {
     try {
       const res = await fetch('/api/bookings', { cache: 'no-store' });
@@ -600,6 +599,10 @@ export default function Admin() {
           <a href="/admin/audit" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
             <span className="text-xl">📋</span>
             <span className="text-xs mt-1">Audit</span>
+          </a>
+          <a href="/admin/inventory" className="flex flex-col items-center px-3 py-2 hover:bg-blue-800 rounded min-w-[64px]">
+            <span className="text-xl">📦</span>
+            <span className="text-xs mt-1">Inventory</span>
           </a>
           <a href="/api/export" download className="flex flex-col items-center px-3 py-2 hover:bg-green-700 rounded min-w-[64px]">
             <span className="text-xl">📥</span>
