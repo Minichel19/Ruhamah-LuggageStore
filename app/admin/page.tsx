@@ -13,23 +13,35 @@ export default function Admin() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState<'current' | 'upcoming' | 'past'>('current');
 
-  // NEW: search + filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   const router = useRouter();
 
+  // Silent reload — used on mount + interval
+  async function loadBookings() {
+    try {
+      const res = await fetch('/api/bookings', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Unauthorized');
+      const data = await res.json();
+      setBookings(data);
+      setLastRefresh(new Date());
+    } catch {
+      router.push('/admin/login');
+    }
+  }
+
   useEffect(() => {
-    fetch('/api/bookings')
-      .then(r => r.ok ? r.json() : Promise.reject('Unauthorized'))
-      .then(setBookings)
-      .catch(() => router.push('/admin/login'));
-
+    loadBookings();
     fetch('/api/settings').then(r => r.json()).then(setSettings);
-
     fetch('/api/admin/me')
       .then(r => r.ok ? r.json() : { role: 'unauthorized' })
       .then(d => setRole(d.role || 'unauthorized'));
+
+    const interval = setInterval(loadBookings, 30000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   async function updateStatus(id: string, status: string) {
@@ -123,19 +135,12 @@ export default function Admin() {
   const isOwner = role === 'owner';
   const today = new Date().toISOString().split('T')[0];
 
-  // NEW: apply search + status filter to any list
   function applyFilters(list: any[]) {
     return list.filter((b) => {
       if (statusFilter && b.status !== statusFilter) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        const haystack = [
-          b.customer_name,
-          b.customer_email,
-          b.customer_phone,
-          b.notes,
-          b.id,
-        ]
+        const haystack = [b.customer_name, b.customer_email, b.customer_phone, b.notes, b.id]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
@@ -358,7 +363,14 @@ export default function Admin() {
             <span className="text-4xl">🇺🇸</span>
             <div>
               <h1 className="text-2xl font-bold">Ruhamah LuggageStore</h1>
-              <p className="text-sm text-blue-100">Role: {role}</p>
+              <p className="text-sm text-blue-100">
+                Role: {role}
+                {lastRefresh && (
+                  <span className="ml-2 text-xs">
+                    · 🔄 {lastRefresh.toLocaleTimeString()}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           {isOwner && (
