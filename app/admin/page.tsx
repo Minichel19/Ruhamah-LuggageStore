@@ -12,6 +12,11 @@ export default function Admin() {
   const [scannedBooking, setScannedBooking] = useState<any>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState<'current' | 'upcoming' | 'past'>('current');
+
+  // NEW: search + filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
   const router = useRouter();
 
   useEffect(() => {
@@ -118,9 +123,31 @@ export default function Admin() {
   const isOwner = role === 'owner';
   const today = new Date().toISOString().split('T')[0];
 
-  const upcoming = bookings.filter(b => b.dropoff_date > today && b.status !== 'picked_up' && b.status !== 'no_show');
-  const current = bookings.filter(b => b.dropoff_date <= today && b.status !== 'picked_up' && b.status !== 'no_show');
-  const past = bookings.filter(b => b.status === 'picked_up' || b.status === 'no_show');
+  // NEW: apply search + status filter to any list
+  function applyFilters(list: any[]) {
+    return list.filter((b) => {
+      if (statusFilter && b.status !== statusFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const haystack = [
+          b.customer_name,
+          b.customer_email,
+          b.customer_phone,
+          b.notes,
+          b.id,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  const upcoming = applyFilters(bookings.filter(b => b.dropoff_date > today && b.status !== 'picked_up' && b.status !== 'no_show'));
+  const current = applyFilters(bookings.filter(b => b.dropoff_date <= today && b.status !== 'picked_up' && b.status !== 'no_show'));
+  const past = applyFilters(bookings.filter(b => b.status === 'picked_up' || b.status === 'no_show'));
 
   const StatusBadge = ({ status }: { status: string }) => {
     if (status === 'paid') {
@@ -158,13 +185,7 @@ export default function Admin() {
     );
   };
 
-  const StatusDropdown = ({
-    id,
-    status,
-  }: {
-    id: string;
-    status: string;
-  }) => (
+  const StatusDropdown = ({ id, status }: { id: string; status: string }) => (
     <div className="space-y-1">
       <StatusBadge status={status} />
       <select
@@ -352,6 +373,34 @@ export default function Admin() {
       </div>
 
       <div className="max-w-6xl mx-auto p-8">
+        {/* Search + Filter bar */}
+        <div className="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1">🔍 Search</label>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, email, phone, notes, or booking ID..."
+              className="w-full border p-2 rounded text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full border p-2 rounded text-sm bg-white"
+            >
+              <option value="">All statuses</option>
+              <option value="paid">🟡 PAID</option>
+              <option value="stored">🟢 STORED</option>
+              <option value="picked_up">✅ PICKED UP</option>
+              <option value="no_show">🔴 NO-SHOW</option>
+            </select>
+          </div>
+        </div>
+
         {/* Collapsible Settings */}
         {isOwner && showSettings && (
           <section className="bg-white rounded-lg shadow p-6 mb-8 border-t-4 border-blue-900">
